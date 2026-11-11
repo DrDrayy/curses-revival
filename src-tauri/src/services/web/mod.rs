@@ -190,6 +190,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
                     Ok((_addr, server)) => server.await,
                     Err(err) => {
                         eprintln!("web: unable to start the server on port {}: {}", app_port, err);
+                        crate::services::log::log_error(&format!("web: unable to start the server on port {}: {}", app_port, err));
                     }
                 }
             });
@@ -198,6 +199,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
                 while let Some(output) = pubsub_output_rx.recv().await {
                     if let Err(err) = handle.emit_all("pubsub", output) {
                         eprintln!("web: unable to send the message to the app: {}", err);
+                        crate::services::log::log_error(&format!("web: unable to send the message to the app: {}", err));
                     }
                 }
             });

@@ -135,6 +135,9 @@
   },
 
   "settings": {
+    "section_logs": "错误日志",
+    "logs_desc": "问题会写入本机的日志文件，令牌和密钥不会被记录。",
+    "btn_open_logs": "打开日志文件夹",
     "title": "设置",
     "desc_1": "本应用由 Mmp 制作",
     "desc_2": "加入 discord 以获取更新和帮助!",
@@ -176,6 +179,9 @@
     "field_map_scenes": "场景地图"
   },
   "twitch": {
+    "field_client_id": "Twitch 客户端 ID",
+    "client_id_desc": "在 dev.twitch.tv/console/apps 创建应用，将 OAuth 重定向 URL 设为 http://localhost:3030/oauth_twitch.html，然后在此粘贴其客户端 ID。",
+    "client_id_missing": "请先填写 Twitch 客户端 ID",
     "title": "Twitch",
     "btn_logout": "注销",
     "btn_login": "登录",
@@ -208,6 +214,7 @@
     "field_post_only_when_streaming": "只在在线时推送"
   },
   "vrc": {
+    "textbox_notify_sound": "播放聊天框提示音",
     "title": "VRChat chatbox",
     "notice_title": "请先在 VRChat 中启用 OSC!",
     "notice_desc": "菜单 » 设置 » OSC » 启用",

@@ -139,6 +139,9 @@
   },
 
   "settings": {
+    "section_logs": "Error log",
+    "logs_desc": "Problems are written to a log file on this PC. Tokens and keys are hidden from it.",
+    "btn_open_logs": "Open log folder",
     "title": "Settings",
     "desc_1": "Made with 💖 by Mmp",
     "desc_2": "Join discord for updates and help!",
@@ -180,6 +183,9 @@
     "field_map_scenes": "Map scenes"
   },
   "twitch": {
+    "field_client_id": "Twitch Client ID",
+    "client_id_desc": "Create an app at dev.twitch.tv/console/apps, set its OAuth Redirect URL to http://localhost:3030/oauth_twitch.html, then paste its Client ID here.",
+    "client_id_missing": "Add your Twitch Client ID first",
     "title": "Twitch",
     "btn_logout": "Logout",
     "btn_login": "Login",
@@ -213,6 +219,7 @@
     "field_post_only_when_streaming": "Post only when live streaming"
   },
   "vrc": {
+    "textbox_notify_sound": "Play chatbox sound",
     "title": "VRChat chatbox",
     "notice_title": "Enable OSC in VRChat first!",
     "notice_desc": "Radial Menu » Options » OSC » Enable",

@@ -20,6 +20,7 @@ class VRC_TextboxTarget implements IVRCTarget {
     sendOsc("/chatbox/input", [
       { String: text }, // value
       { Bool: true }, // is final
+      { Bool: this.state.notifySound }, // play the notification sound
     ]);
     // give every message its reading time (and stay under the chatbox rate limit)
     this.#nextSendAt = Date.now() + Math.max(MIN_GAP, Array.from(text).length * MS_PER_CHAR);

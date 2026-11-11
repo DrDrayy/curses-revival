@@ -2,6 +2,7 @@ import { IServiceInterface, ServiceNetworkState, TextEventType } from "@/types";
 import { ApiClient, HelixUser } from "@twurple/api";
 import { InvalidTokenError, InvalidTokenTypeError, StaticAuthProvider } from "@twurple/auth";
 import { proxy } from "valtio";
+import { toast } from "react-toastify";
 import { subscribeKey } from "valtio/utils";
 import {
   serviceSubscibeToInput,
@@ -60,6 +61,11 @@ class Service_Twitch implements IServiceInterface {
     return window.ApiServer.state.services.twitch;
   }
 
+  // the Twitch app id typed into the app, else the one built in
+  get #clientId(): string {
+    return (this.#state.data.clientId || "").trim() || import.meta.env.CURSES_TWITCH_CLIENT_ID || "";
+  }
+
   async init() {
     this.emotes = new TwitchEmotesApi();
     this.chat = new TwitchChatApi();
@@ -74,6 +80,12 @@ class Service_Twitch implements IServiceInterface {
         if (this.state.user && this.authProvider)
           this.chat.connect(this.state.user.name, this.authProvider);
       } else this.chat.disconnect();
+    });
+
+    // the token belongs to the old Twitch app: sign out (does not fire on startup)
+    subscribeKey(this.#state.data, "clientId", () => {
+      if (this.#state.data.token)
+        this.logout();
     });
 
     serviceSubscibeToSource(this.#state.data, "chatPostSource", (data) => {
@@ -122,6 +134,11 @@ class Service_Twitch implements IServiceInterface {
 
   login() {
     try {
+      const clientId = this.#clientId;
+      if (!clientId) {
+        toast("Add your Twitch Client ID first", { type: "error", autoClose: 3000 });
+        return;
+      }
       this.#clearRetry();
       // only one login popup listener at a time
       this.#loginCleanup?.();
@@ -132,10 +149,7 @@ class Service_Twitch implements IServiceInterface {
           : import.meta.env.CURSES_TWITCH_CLIENT_REDIRECT_LOCAL;
 
       const link = new URL("https://id.twitch.tv/oauth2/authorize");
-      link.searchParams.set(
-        "client_id",
-        import.meta.env.CURSES_TWITCH_CLIENT_ID
-      );
+      link.searchParams.set("client_id", clientId);
       link.searchParams.set("redirect_uri", redirect);
       link.searchParams.set("response_type", "token");
       link.searchParams.set("scope", scope.join("+"));
@@ -229,9 +243,11 @@ class Service_Twitch implements IServiceInterface {
     const isStale = () => attempt !== this.#connectAttempt;
     try {
       if (!this.#state.data.token) return this.logout();
+      // no Client ID: stay disconnected, keep the token
+      if (!this.#clientId) return;
 
       const authProvider = new StaticAuthProvider(
-        import.meta.env.CURSES_TWITCH_CLIENT_ID,
+        this.#clientId,
         this.#state.data.token,
         scope
       );

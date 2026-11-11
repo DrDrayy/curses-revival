@@ -82,6 +82,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![get_port, get_native_features, app_close])
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .manage(AppConfiguration { port: args.port })
+        .plugin(services::log::init())
         .plugin(services::osc::init())
         .plugin(services::web::init())
         .plugin(services::audio::init())

@@ -12,6 +12,7 @@ import Service_TTS from "./services/tts";
 import Service_Twitch from "./services/twitch";
 import Service_VRC from "./services/vrc";
 import { changeLanguage, initI18n } from '@/i18n';
+import { installErrorLog } from '@/utils/log';
 
 export enum Services {
   vrc = "vrc",
@@ -92,6 +93,7 @@ class ApiServer {
   }
 
   public async init() {
+    installErrorLog();
     if (window.Config.isClient())
       return;
     await this._state.init();

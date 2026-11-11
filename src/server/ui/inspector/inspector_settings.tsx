@@ -12,6 +12,7 @@ import ServiceButton from "../service-button";
 import Inspector from "./components";
 import { InputChips, InputNetworkStatus, InputSelect, InputShortcut, InputText } from "./components/input";
 import { useTranslation } from "react-i18next";
+import { invoke } from "@tauri-apps/api/tauri";
 import { i18nLanguages, loadLanguageFile } from "@/i18n";
 const themesLight = [
   'light',
@@ -164,6 +165,9 @@ const Inspector_Settings: FC = memo(() => {
       <ServiceButton startLabel="common.btn_connect" stopLabel="common.btn_disconnect" status={linkStatus} onStart={() => window.ApiShared.pubsub.linkConnect()} onStop={() => window.ApiShared.pubsub.linkDisconnect()} />
       <button className="btn btn-sm btn-ghost" onClick={() => window.ApiShared.pubsub.copyLinkAddress()}>{t('settings.btn_copy_address')}</button>
 
+      <Inspector.SubHeader>{t('settings.section_logs')}</Inspector.SubHeader>
+      <Inspector.Description>{t('settings.logs_desc')}</Inspector.Description>
+      <button className="btn btn-sm" onClick={() => invoke("plugin:log|open_folder").catch(() => {})}>{t('settings.btn_open_logs')}</button>
 
     </Inspector.Content>
   </Inspector.Body>

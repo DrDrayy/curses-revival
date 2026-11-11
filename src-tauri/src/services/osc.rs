@@ -47,11 +47,13 @@ impl OscPlugin {
             Ok(buf) => buf,
             Err(err) => {
                 eprintln!("osc: unable to encode the message: {:?}", err);
+                crate::services::log::log_error(&format!("osc: unable to encode the message: {:?}", err));
                 return;
             }
         };
         if let Err(err) = socket.send_to(&msg_buf, addr) {
             eprintln!("osc: unable to send the message: {}", err);
+            crate::services::log::log_error(&format!("osc: unable to send the message: {}", err));
         }
     }
 }

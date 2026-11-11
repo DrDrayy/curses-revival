@@ -15,6 +15,7 @@ export const Service_VRC_Schema = z.object({
   inputField: zSafe(z.coerce.boolean(), true),
   textbox: z.object({
     indicator: zSafe(z.coerce.boolean(), true),
+    notifySound: zSafe(z.coerce.boolean(), true),
   }).default({}),
   killfrenzy: z.object({
     syncDelay: zSafe(zStringNumber(), "250"),

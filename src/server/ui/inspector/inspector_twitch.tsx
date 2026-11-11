@@ -80,7 +80,11 @@ const Inspector_Twitch: FC = () => {
         </div>
       </div>}
 
-      {!user && <button className="btn gap-2 border-none" style={{backgroundColor: "#9147ff", color: "#fff"}} onClick={handleLogin}><SiTwitch size={20}/> {t('twitch.btn_login')}</button>}
+      {!user && <>
+        <InputText label="twitch.field_client_id" type="password" value={pr.clientId} onChange={e => up("clientId", e.target.value)} />
+        <Inspector.Description>{t('twitch.client_id_desc')}</Inspector.Description>
+      </>}
+      {!user && <button className="btn gap-2 border-none disabled:opacity-50" disabled={!pr.clientId.trim() && !import.meta.env.CURSES_TWITCH_CLIENT_ID} style={{backgroundColor: "#9147ff", color: "#fff"}} onClick={handleLogin}><SiTwitch size={20}/> {t('twitch.btn_login')}</button>}
       <Inspector.Switchable visible={!!user}>
         <InputNetworkStatus label="twitch.status_stream" connectedLabel={t('common.status_online')} disconnectedLabel={t('common.status_offline')} value={liveStatus} />
         <InputNetworkStatus label="twitch.status_chat" value={chatState.connection} />
