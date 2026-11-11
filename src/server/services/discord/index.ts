@@ -40,12 +40,13 @@ class Service_Discord implements IServiceInterface {
         },
         body: JSON.stringify({
           content: value,
+          allowed_mentions: { parse: [] }, // no @everyone / @role / @user pings
           embeds: null,
           username: this.#state.data.channelBotName || "Curses",
           avatar_url: this.#state.data.channelAvatarUrl || "",
           attachments: [],
         }),
-      });
+      }).catch(() => {});
   }
 }
 

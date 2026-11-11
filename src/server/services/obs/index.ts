@@ -12,9 +12,16 @@ import {
   serviceSubscibeToSource,
 } from "../../../utils";
 
+// reconnect delay: 2s, doubling up to 30s
+const WS_RETRY_MIN = 2000;
+const WS_RETRY_MAX = 30000;
+
 class Service_OBS implements IServiceInterface {
   private wsInstance!: OBSWebSocket;
   private wsRequestCancelToken = false;
+  private wsConnectInFlight = false;
+  private wsRetryTimer?: ReturnType<typeof setTimeout>;
+  private wsRetryDelay = WS_RETRY_MIN;
 
   wsState = proxy({
     status: ServiceNetworkState.disconnected,
@@ -63,7 +70,7 @@ class Service_OBS implements IServiceInterface {
 
   private processTextEvent(data?: TextEvent) {
     if (
-      // this.#state.enable && 
+      this.#state.captionsEnable &&
       this.wsState.status === ServiceNetworkState.connected &&
       data?.value
       && (
@@ -91,7 +98,7 @@ class Service_OBS implements IServiceInterface {
       }
       else {
         if (this.#state.wsAutoStart)
-          this.wsConnect().catch();
+          this.wsScheduleReconnect();
         else {
           this.wsState.status = ServiceNetworkState.disconnected;
           this.toastError(e);
@@ -106,35 +113,79 @@ class Service_OBS implements IServiceInterface {
     }
   }
 
+  // host from settings, local OBS by default
+  private get wsHost() {
+    return (this.#state.wsHost ?? "").trim() || "127.0.0.1";
+  }
+
+  private wsClearRetry() {
+    if (this.wsRetryTimer !== undefined) {
+      clearTimeout(this.wsRetryTimer);
+      this.wsRetryTimer = undefined;
+    }
+  }
+
+  // try again later, with growing delay
+  private wsScheduleReconnect() {
+    this.wsClearRetry();
+    const delay = this.wsRetryDelay;
+    this.wsRetryDelay = Math.min(delay * 2, WS_RETRY_MAX);
+    // still "connecting" while waiting, so the user can cancel
+    this.wsState.status = ServiceNetworkState.connecting;
+    this.wsRetryTimer = setTimeout(() => {
+      this.wsRetryTimer = undefined;
+      this.wsConnect().catch(() => {});
+    }, delay);
+  }
+
   async wsConnect() {
+    this.wsClearRetry();
     if (this.#state.wsPort === "") {
+      this.wsState.status = ServiceNetworkState.disconnected;
       toast("[OBS] Invalid connection port", { type: "error", autoClose: false });
       return;
     }
     this.wsState.status = ServiceNetworkState.connecting;
+    this.wsRequestCancelToken = false;
 
     try {
+      this.wsConnectInFlight = true;
       this.wsInstance.disconnect();
       this.wsInstance.removeAllListeners("ConnectionClosed");
-      await this.wsInstance.connect(`ws://127.0.0.1:${this.#state.wsPort}`,this.#state.wsPassword, {
+      await this.wsInstance.connect(`ws://${this.wsHost}:${this.#state.wsPort}`,this.#state.wsPassword, {
         eventSubscriptions: EventSubscription.All | EventSubscription.Scenes
       });
+      this.wsRetryDelay = WS_RETRY_MIN;
       this.wsState.status = ServiceNetworkState.connected;
       this.wsInstance.addListener("ConnectionClosed", e => this.wsHandleDisconnect(e));
     } catch (e: any) {
       if (e instanceof OBSWebSocketError)
         this.wsHandleDisconnect(e);
+      else
+        this.wsState.status = ServiceNetworkState.disconnected;
+    } finally {
+      this.wsConnectInFlight = false;
     }
   }
 
   wsDisconnect() {
+    // user stopped it, no more retries
+    this.wsClearRetry();
+    this.wsRetryDelay = WS_RETRY_MIN;
     this.wsInstance.disconnect();
+    this.wsState.status = ServiceNetworkState.disconnected;
   }
 
   wsCancel() {
+    this.wsClearRetry();
+    this.wsRetryDelay = WS_RETRY_MIN;
     if (this.wsState.status === ServiceNetworkState.connecting) {
-      this.wsInstance.disconnect();
-      this.wsRequestCancelToken = true;
+      if (this.wsConnectInFlight) {
+        this.wsRequestCancelToken = true;
+        this.wsInstance.disconnect();
+      }
+      else // only waiting for a retry
+        this.wsState.status = ServiceNetworkState.disconnected;
     }
   }
 
@@ -150,7 +201,7 @@ class Service_OBS implements IServiceInterface {
     const obs = new OBSWebSocket();
 
     try {
-      await obs.connect(`ws://127.0.0.1:${port}`, password);
+      await obs.connect(`ws://${this.wsHost}:${port}`, password);
       const activeScene = await obs.call("GetCurrentProgramScene");
       const canvas = window.ApiClient.document.fileBinder.get().canvas;
       await obs.call("CreateInput", {

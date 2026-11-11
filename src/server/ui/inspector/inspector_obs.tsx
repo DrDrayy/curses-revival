@@ -78,6 +78,8 @@ const Inspector_OBS: FC = () => {
       <Inspector.Description>{t('obs.websocket_desc')}</Inspector.Description>
       <InputCheckbox label="obs.field_auto_connect" value={data.wsAutoStart} onChange={e => up("wsAutoStart", e)} />
       <InputNetworkStatus label="common.field_connection_status" value={wsState.status} />
+      {/* empty = this pc (127.0.0.1); set it when OBS runs on another pc */}
+      <InputText label="settings.field_ip_address" placeholder="127.0.0.1" value={data.wsHost} onChange={e => up("wsHost", e.target.value)} />
       <InputText label="common.field_connection_port" type="number" value={data.wsPort} onChange={e => up("wsPort", e.target.value)} />
       <InputText label="common.field_password" type="password" value={data.wsPassword} onChange={e => up("wsPassword", e.target.value)} />
       <ServiceButton 

@@ -123,7 +123,7 @@ const BoxInspector: FC<{ id: string }> = ({ id }) => {
       <InputBaseText value={data.boxShadowY} onChange={e => up("boxShadowY", e.target.value)} type="number" />
     </InputDoubleCountainer>
     <InputText label="text.box_shadow_blur" type="number" value={data.boxShadowZ} onChange={e => up("boxShadowZ", e.target.value)} />
-    <InputText label="text.box_shadow_spread" type="number" value={data.boxShadowSpread} onChange={e => up("boxShadowZ", e.target.value)} />
+    <InputText label="text.box_shadow_spread" type="number" value={data.boxShadowSpread} onChange={e => up("boxShadowSpread", e.target.value)} />
     <InputColor label="text.box_shadow_color" value={data.boxShadowColor} onChange={e => up("boxShadowColor", e)} />
 
     <Inspector.SubHeader>{t('text.section_box_background')}</Inspector.SubHeader>

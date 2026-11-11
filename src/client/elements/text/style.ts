@@ -69,16 +69,16 @@ export function buildStateStyle(state: any): string {
     background-position: center;
     background-repeat: no-repeat;
     background-color: ${state.boxColor};
-    background-image: url("${window.ApiClient.files.getFileUrl(state.boxImageFileId)}");
+    background-image: ${window.ApiClient.files.getFileCssUrl(state.boxImageFileId)};
     border-style: solid;
     border-radius: ${state.boxBorderRadius}px;
     border-width: ${state.boxBorderWidth}px;
     border-color: ${state.boxBorderColor};
     ` :
       `
-    border-image: url(${window.ApiClient.files.getFileUrl(state.boxImageFileId)}) ${state.boxSliceTileSize} round;
-    border-image-slice: ${state.boxSliceTop} ${state.boxSliceRight} ${state.boxSliceBottom} ${state.boxSliceBottom} fill;
-    border-image-width: ${state.boxSliceTop}px ${state.boxSliceRight}px ${state.boxSliceBottom}px ${state.boxSliceBottom}px;
+    border-image: ${window.ApiClient.files.getFileCssUrl(state.boxImageFileId)} ${state.boxSliceTileSize} round;
+    border-image-slice: ${state.boxSliceTop} ${state.boxSliceRight} ${state.boxSliceBottom} ${state.boxSliceLeft} fill;
+    border-image-width: ${state.boxSliceTop}px ${state.boxSliceRight}px ${state.boxSliceBottom}px ${state.boxSliceLeft}px;
     `}
   }
   .box::-webkit-scrollbar {
@@ -97,7 +97,7 @@ export function buildStateStyle(state: any): string {
 
   .text{
     padding: ${state.boxPadding}px;
-    font-family: ${state.textFontFamily};
+    font-family: "${String(state.textFontFamily ?? "").replace(/[\r\n]+/g, " ").replace(/["\\]/g, "\\$&")}";
     text-transform: ${state.textCase};
     text-align: ${state.textAlignH};
     font-size: ${state.textFontSize}px;

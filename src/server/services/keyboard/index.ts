@@ -122,22 +122,29 @@ class Service_Keyboard implements IServiceInterface {
     invoke("plugin:bg_input|stop");
   }
 
+  // one rebind at a time: overlapping unregisterAll/register calls could register a key twice
+  private rebinding: Promise<void> = Promise.resolve();
   private rebindShortcuts() {
-    this.rebindShortcutsTauri();
+    this.rebinding = this.rebinding
+      .then(() => this.rebindShortcutsTauri())
+      .catch(err => console.error("sc rebind error", err));
   }
 
   private async rebindShortcutsTauri() {
     await globalShortcut.unregisterAll();
+    const registering: Promise<void>[] = [];
     for (let k in window.ApiServer.state.shortcuts) {
       let key: ShortcutKeys = k as any;
-      window.ApiServer.state.shortcuts[key] !== "" && globalShortcut.register(window.ApiServer.state.shortcuts[key], k => {
+      window.ApiServer.state.shortcuts[key] !== "" && registering.push(globalShortcut.register(window.ApiServer.state.shortcuts[key], k => {
         this.processShortcut(key);
       }).catch(err => {
         toast.error(`Invalid shortkey ${window.ApiServer.state.shortcuts[key]}`);
         window.ApiServer.state.shortcuts[key] = ""
         console.log("sc error", err);
-      });
+      }));
     }
+    // the next rebind must not start before these are done
+    await Promise.all(registering);
     // globalShortcut.registerAll(Object.entries(window.API.state.shortcuts), shortcut => {
 
     // });
@@ -153,13 +160,23 @@ class Service_Keyboard implements IServiceInterface {
 
   clearShortcut(shortcut: ShortcutKeys) {
     window.ApiServer.state.shortcuts[shortcut] = "";
+    // unregister the old key
+    this.rebindShortcuts();
+  }
+
+  // recorded keys as a tauri shortcut string, keys without a mapping are skipped
+  private tempRecordValue() {
+    return Array.from(this.tempRecordSet).map(k => TauriKeysMap[k.key]).filter(Boolean).join("+");
   }
 
   private tempRecordSet = new Set<{key: string, code: number, location: number}>;
   async startShortcutRecord(target: ShortcutKeys) {
     this.ui.currentTarget = target;
     this.ui.showRecorder = true;
-    globalShortcut.unregisterAll();
+    // in the same chain as the rebinds, so a rebind still running can't register the keys again while recording
+    this.rebinding = this.rebinding
+      .then(() => globalShortcut.unregisterAll())
+      .catch(err => console.error("sc unregister error", err));
     hotkeys("*", e => {
       // check if already has on location-0 key [TAURI BUG - only one char allowed]
       let filteredArr = Array.from(this.tempRecordSet).filter(key => hotkeys.isPressed(key.code));
@@ -175,30 +192,37 @@ class Service_Keyboard implements IServiceInterface {
       // this.ui.currentValue = Array.from(this.tempRecordSet).map(k => (<any>NativeKeysMap)[k.key] as string).join("+")
 
       //tauri
-      this.ui.currentValue = Array.from(this.tempRecordSet).map(k => TauriKeysMap[k.key]).join("+");
+      this.ui.currentValue = this.tempRecordValue();
       e.preventDefault();
     })
   }
   confirmShortcutRecord() {
-    this.ui.showRecorder = false;
-    this.ui.currentValue = "";
-    hotkeys.unbind("*");
+    // shortcuts were unregistered when recording started, always register them again
+    try {
+      this.ui.showRecorder = false;
+      this.ui.currentValue = "";
+      hotkeys.unbind("*");
 
-    // native
-    // let value = Array.from(this.tempRecordSet).map(k => (<any>NativeKeysMap)[k.key] as string).join("+");
+      // native
+      // let value = Array.from(this.tempRecordSet).map(k => (<any>NativeKeysMap)[k.key] as string).join("+");
 
-    // tauri
-    let value = Array.from(this.tempRecordSet).map(k => TauriKeysMap[k.key]).join("+");
-    this.tempRecordSet.clear();
+      // tauri
+      let value = this.tempRecordValue();
+      this.tempRecordSet.clear();
 
-    if (!this.ui.currentTarget)
-      return;
-    // if shortuct already exists
-    if (Object.values(window.ApiServer.state.shortcuts).includes(value))
-      return;
+      if (!this.ui.currentTarget)
+        return;
+      // nothing recorded
+      if (!value)
+        return;
+      // if shortuct already exists
+      if (Object.values(window.ApiServer.state.shortcuts).includes(value))
+        return;
 
-    window.ApiServer.state.shortcuts[this.ui.currentTarget] = value;
-    this.rebindShortcuts();
+      window.ApiServer.state.shortcuts[this.ui.currentTarget] = value;
+    } finally {
+      this.rebindShortcuts();
+    }
   }
   cancelComboRecord() {
     this.ui.showRecorder = false;

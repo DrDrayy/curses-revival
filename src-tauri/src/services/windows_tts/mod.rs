@@ -120,7 +120,7 @@ pub struct RpcWindowsTTSSpeak {
     voice: String,
     value: String,
     volume: f32, // 0 - 1
-    rate: f32 // 0 - 1 - 5
+    rate: f32 // 0.1 - 1 - 5
 }
 
 #[command]
@@ -136,12 +136,14 @@ fn speak(data: RpcWindowsTTSSpeak, state: State<WindowsTTSPlugin>) -> Result<(),
         return Err("Unable to update volume");
     }
 
-    // convert multiply based [0 - 1 - 5] to range [-10 - 10]
+    // convert multiply based [0.1 - 1 - 5] to range [-10 - 0 - 10]:
+    // 0.1..1 maps linearly onto -10..0 and 1..5 onto 0..10
     let rate = if data.rate >= 1.0 {
-        ((data.rate - 1.0) / 4.0 * 10.0) as i32
+        (data.rate - 1.0) / 4.0 * 10.0
     } else {
-        (-data.rate * 100.0) as i32
+        (data.rate - 1.0) / 0.9 * 10.0
     };
+    let rate = rate.round().clamp(-10.0, 10.0) as i32;
     if unsafe {sp_voice.0.SetRate(rate)}.is_err() {
         return Err("Unable to update rate");
     }

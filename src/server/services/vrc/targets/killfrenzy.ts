@@ -1,5 +1,6 @@
 import { IVRCTarget } from "../types";
-import { sendOsc }    from "./utils";
+import { sendOsc, splitText } from "./utils";
+import { parseIntOr }     from "@/utils";
 import chunk          from "lodash/chunk";
 
 async function sleep(time: number) {
@@ -37,54 +38,59 @@ class VRC_KillFrenzyTarget implements IVRCTarget {
     if (this.isRunning || !this.queue.length)
       return;
 
-    this.isRunning = true;
-
-    const value = this.queue.shift();
-
-    const syncPointsCount = parseInt(this.state.syncPoints) ?? 0;
-    if (!syncPointsCount)
+    // check before taking anything from the queue, so the busy flag can't get stuck
+    const syncPointsCount = parseIntOr(this.state.syncPoints, 0);
+    if (syncPointsCount <= 0) {
+      this.queue = []; // can't send anything with this setting
       return;
-
-    clearTimeout(this.hideTimer);
-
-    // prevent insta hide -> show
-    await sleep(this.delayTimer);
-
-    if (!this.hideTimer)  // make visible
-      this.setVisibility(true);
-      else // if visible, just clear
-      this.setPointer(255);
-
-      await sleep(this.delayTimer);
-
-    const chunks = chunk(value, syncPointsCount);
-    for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
-      const chunk = chunks[chunkIndex];
-
-      if (chunkIndex === chunks.length -1) // fill undersized chunk
-        chunk.push(...new Array(syncPointsCount - chunks[chunkIndex].length).fill(" ").join(""));
-
-      this.setPointer(chunkIndex + 1);
-
-      for (let i = 0; i < chunk.length; i++) {
-        this.setSyncChar(i, (KillsKeys[chunk[i]] ?? 255) / 127);
-      }
-      await sleep(this.delayTimer);
     }
 
-    this.isRunning = false;
-    this.triggerTimer();
-    this.tryDequeueAndSend();
+    this.isRunning = true;
+    try {
+      const value = this.queue.shift() ?? "";
+
+      clearTimeout(this.hideTimer);
+
+      // prevent insta hide -> show
+      await sleep(this.delayTimer);
+
+      if (!this.hideTimer)  // make visible
+        this.setVisibility(true);
+      else // if visible, just clear
+        this.setPointer(255);
+
+      await sleep(this.delayTimer);
+
+      // split by code points, not utf-16 units
+      const chunks = chunk(Array.from(value), syncPointsCount);
+      for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
+        const chunk = chunks[chunkIndex];
+
+        if (chunkIndex === chunks.length -1) // fill undersized chunk
+          chunk.push(...new Array(syncPointsCount - chunks[chunkIndex].length).fill(" ").join(""));
+
+        this.setPointer(chunkIndex + 1);
+
+        for (let i = 0; i < chunk.length; i++) {
+          this.setSyncChar(i, (KillsKeys[chunk[i]] ?? 255) / 127);
+        }
+        await sleep(this.delayTimer);
+      }
+
+      this.triggerTimer();
+    } finally {
+      this.isRunning = false;
+      this.tryDequeueAndSend();
+    }
   }
 
   // enqueue sentence
   async pushFinal(value: string) {
     if (this.state.splitSentences) {
-      const sentenceSplit = chunk(value, 128).map(str => str.join(""));
-      this.queue.push(...sentenceSplit);
+      this.queue.push(...splitText(value, 128));
     }
     else
-      this.queue.push(value.slice(0, 128));
+      this.queue.push(Array.from(value).slice(0, 128).join(""));
     this.tryDequeueAndSend();
   }
 

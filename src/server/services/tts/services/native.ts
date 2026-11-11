@@ -1,9 +1,15 @@
+import { parseFloatOr } from "../../../../utils";
 import { TTS_State } from "../schema";
 import { ITTSReceiver, ITTSService } from "../types";
 
+// how long to wait for the browser to list its voices
+const VOICES_TIMEOUT = 3000;
+
 export class TTS_NativeService implements ITTSService {
   constructor(private bindings: ITTSReceiver) {}
-  #instance?: SpeechSynthesisUtterance;
+  #voice?: SpeechSynthesisVoice;
+  // keep references while speaking, some browsers drop utterances that get garbage collected
+  #active = new Set<SpeechSynthesisUtterance>();
 
   dispose(): void {}
 
@@ -14,38 +20,51 @@ export class TTS_NativeService implements ITTSService {
 
       let voices = window.speechSynthesis.getVoices();
       if (!voices.length) {
-        // wait for voices
-        await new Promise(res => window.speechSynthesis.onvoiceschanged = res)
+        // wait for voices, but not forever
+        await new Promise<void>(res => {
+          const done = () => {
+            clearTimeout(timer);
+            window.speechSynthesis.onvoiceschanged = null;
+            res();
+          };
+          const timer = setTimeout(done, VOICES_TIMEOUT);
+          window.speechSynthesis.onvoiceschanged = done;
+        });
       }
 
       voices = window.speechSynthesis.getVoices();
       let voice = voices.find(voice => voice.voiceURI === this.state.voice);
 
       if (!voice) {
-        this.bindings.onStop("Invalid voice");
+        this.bindings.onStop(voices.length ? "Invalid voice" : "No voices available");
         return;
       }
 
-      this.#instance = new SpeechSynthesisUtterance();
-
-      this.#instance.voice = voice;
-      this.#instance.volume = 1;
+      this.#voice = voice;
 
       this.bindings.onStart();
-    } catch (error) {}
+    } catch (error: any) {
+      this.bindings.onStop(error?.message);
+    }
   }
 
   get state() {
     return window.ApiServer.state.services.tts.data.native;
   }
   play(value: string): void {
-    if (!this.#instance)
+    if (!this.#voice)
       return;
-    this.#instance.text = value;
-    this.#instance.pitch = parseFloat(this.state.pitch) ?? 1;
-    this.#instance.rate = parseFloat(this.state.rate) ?? 1;
-    this.#instance.volume = parseFloat(this.state.volume) ?? 1;
-    window.speechSynthesis.speak(this.#instance);
+    // new utterance for every line, a reused one can't be queued twice
+    const utterance = new SpeechSynthesisUtterance(value);
+    utterance.voice = this.#voice;
+    utterance.pitch = parseFloatOr(this.state.pitch, 1);
+    utterance.rate = parseFloatOr(this.state.rate, 1);
+    utterance.volume = parseFloatOr(this.state.volume, 1);
+    const release = () => this.#active.delete(utterance);
+    utterance.onend = release;
+    utterance.onerror = release;
+    this.#active.add(utterance);
+    window.speechSynthesis.speak(utterance);
   }
   stop(): void {
     this.bindings.onStop();

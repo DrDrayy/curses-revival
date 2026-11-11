@@ -257,10 +257,14 @@
       if (listElement.childElementCount >= 20)
         listElement.firstChild.remove()
       const newDiv = document.createElement("div");
-      newDiv.innerHTML = `
-      <span class="event">${event}</span>
-      <span class="value">${value}</span>
-      `
+      // text only: messages must never be read as html
+      const eventSpan = document.createElement("span");
+      eventSpan.className = "event";
+      eventSpan.textContent = event;
+      const valueSpan = document.createElement("span");
+      valueSpan.className = "value";
+      valueSpan.textContent = value;
+      newDiv.append(eventSpan, " ", valueSpan);
       listElement.append(newDiv);
     }
 

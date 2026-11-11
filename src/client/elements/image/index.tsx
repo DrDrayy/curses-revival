@@ -17,6 +17,10 @@ const Element_Image: FC<{ id: string }> = memo(({ id }) => {
     attributeController.current = new StyleToEventController(state.styleCss, attrs => {
       setAttributes(Object.fromEntries(attrs.map(a => [a.toLowerCase(), ""])));
     });
+    return () => {
+      attributeController.current?.dispose();
+      attributeController.current = undefined;
+    };
   });
 
   const [active, setActive] = useState(false);
@@ -53,7 +57,7 @@ const Element_Image: FC<{ id: string }> = memo(({ id }) => {
         margin: auto;
         object-fit: contain;
         opacity: ${state.styleOpacity};
-        background-image: url("${window.ApiClient.files.getFileUrl(state.fileId)}");
+        background-image: ${window.ApiClient.files.getFileCssUrl(state.fileId)};
         transition: opacity ${state.activeTransitionDuration}ms ease-in-out, background-image ${state.activeTransitionDuration}ms ease-in-out;
         background-size: contain;
         background-position: center;
@@ -61,7 +65,7 @@ const Element_Image: FC<{ id: string }> = memo(({ id }) => {
       }
       .image.active{
         opacity: ${state.activeStyleOpacity};
-        background-image: url("${window.ApiClient.files.getFileUrl(state.activeFileId)}");
+        ${state.activeFileId ? `background-image: ${window.ApiClient.files.getFileCssUrl(state.activeFileId)};` : ""}
       }
       `}
     </style>

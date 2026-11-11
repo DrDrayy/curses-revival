@@ -375,9 +375,11 @@
       let host = location.hostname;
       let port = location.port;
       const q = new URLSearchParams(window.location.search.substring(1));
-      if (q.has("host"))
+      // only this pc or the local network: a link must not point the page at someone else's server
+      const isLocalHost = h => /^(localhost|127\.\d+\.\d+\.\d+|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)$/.test(h);
+      if (q.has("host") && isLocalHost(q.get("host")))
         host = q.get("host");
-      if (q.has("port"))
+      if (q.has("port") && /^\d{1,5}$/.test(q.get("port")))
         port = q.get("port");
 
       selectLang.oninput = e => handleSelectLang(e.target.value);
@@ -414,10 +416,14 @@
         if (listElement.childElementCount >= 20)
           listElement.firstChild.remove()
         const newDiv = document.createElement("div");
-        newDiv.innerHTML = `
-      <span class="event">${event}</span>
-      <span class="value">${value}</span>
-      `
+        // text only: messages must never be read as html
+        const eventSpan = document.createElement("span");
+        eventSpan.className = "event";
+        eventSpan.textContent = event;
+        const valueSpan = document.createElement("span");
+        valueSpan.className = "value";
+        valueSpan.textContent = value;
+        newDiv.append(eventSpan, " ", valueSpan);
         listElement.append(newDiv);
       }
 

@@ -56,22 +56,68 @@ export type WordReplacementsCache = {
   map: Record<string, string>,
   regexp: RegExp
   isEmpty: boolean
+  // keys in `map` are lowercase when true
+  ignoreCase: boolean
 }
 
+// parseFloat that falls back only when the result is NaN, so 0 stays 0
+export function parseFloatOr(value: unknown, fallback: number): number {
+  const n = parseFloat(String(value));
+  return Number.isNaN(n) ? fallback : n;
+}
+
+// parseInt that falls back only when the result is NaN, so 0 stays 0
+export function parseIntOr(value: unknown, fallback: number): number {
+  const n = parseInt(String(value));
+  return Number.isNaN(n) ? fallback : n;
+}
+
+const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// word boundary that also works for keys starting/ending with symbols (\b does not)
+const WORD_CHAR = "[\\p{L}\\p{N}_]";
+const startsWithWordChar = new RegExp(`^${WORD_CHAR}`, "u");
+const endsWithWordChar = new RegExp(`${WORD_CHAR}$`, "u");
+
 export function buildWordReplacementsCache(map: Record<string, string>, caseInsensitive: boolean): WordReplacementsCache {
-  let trimKeys = Object.fromEntries(Object.entries(map).map(([k,v]) => [k.trim(), v]));
-  console.log(trimKeys);
-  let _map = {}
-  if (caseInsensitive) {
-    _map = Object.fromEntries(Object.entries(map).map(([k,v]) => [k.toLowerCase(), v]));
+  try {
+    const entries: [string, string][] = [];
+    for (const [k, v] of Object.entries(map ?? {})) {
+      const key = caseInsensitive ? k.trim().toLowerCase() : k.trim();
+      if (!key)
+        continue;
+      entries.push([key, String(v ?? "")]);
+    }
+    const _map: Record<string, string> = Object.fromEntries(entries);
+    // longest first, so "c++" wins over "c"
+    const keys = Object.keys(_map).sort((a, b) => b.length - a.length);
+    if (!keys.length)
+      return emptyWordReplacementsCache(caseInsensitive);
+
+    // symbols at the edges of a key don't need a boundary, letters/digits do
+    const pattern = keys.map(key =>
+      (startsWithWordChar.test(key) ? `(?<!${WORD_CHAR})` : "")
+      + escapeRegExp(key)
+      + (endsWithWordChar.test(key) ? `(?!${WORD_CHAR})` : "")
+    ).join("|");
+
+    return {
+      regexp: new RegExp(`(?:${pattern})`, caseInsensitive ? "giu" : "gu"),
+      map: _map,
+      isEmpty: false,
+      ignoreCase: caseInsensitive
+    };
+  } catch (error) {
+    return emptyWordReplacementsCache(caseInsensitive);
   }
-  else
-    _map = {...map};
-  let regexp = new RegExp(`\\b(${Object.keys(_map).join("|")})\\b`, caseInsensitive ? "ig" : "g");
+}
+
+function emptyWordReplacementsCache(caseInsensitive: boolean): WordReplacementsCache {
   return {
-    regexp,
-    map: _map,
-    isEmpty: !Object.keys(_map).length
+    regexp: new RegExp("(?!)", "g"), // never matches
+    map: {},
+    isEmpty: true,
+    ignoreCase: caseInsensitive
   };
 }
 

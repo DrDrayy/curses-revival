@@ -28,7 +28,9 @@ export class STT_AzureService implements ISTTService {
 
   start(state: STT_State): void {
     // ignore device for now
-    const { device, ...rest } = this.state;
+    const { device, secondary_language_group, secondary_language, ...rest } = this.state;
+    // secondary language is optional: when it is empty only the main language is used (see langConfig below),
+    // even with "use secondary language" on (its default)
     if (Object.values(rest).some(isEmptyValue))
       return this.bindings.onStop("Options missing");
 

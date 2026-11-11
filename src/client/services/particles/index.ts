@@ -29,12 +29,19 @@ class Service_Particles implements IServiceInterface {
     if (document.visibilityState === "hidden")
       return
 
+    // files that are missing (or no files at all) have no image to show
+    const imageUrls = params.imageIds
+      .map(id => window.ApiClient.files.getFileCssUrl(id))
+      .filter(url => url !== "none");
+    if (!imageUrls.length)
+      return;
+
     const listOfParticles = new Array(Math.min(10, anime.random(params.particlesCountMin, params.particlesCountMax))).fill(null).map(_ => {
       var particle = document.createElement("div");
       particle.classList.add("dot");
       particle.style.position = 'absolute';
 
-      particle.style.backgroundImage  = `url("${window.ApiClient.files.getFileUrl(sample(params.imageIds) as string)}")`;
+      particle.style.backgroundImage  = sample(imageUrls) as string;
       particle.style.left     = `${rect.x + rect.width}px`;
       particle.style.top      = `${rect.y}px`;
       return document.body.appendChild(particle);

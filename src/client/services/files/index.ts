@@ -29,6 +29,23 @@ type FontMeta = {
 
 type SaveFile = Omit<FileState, "id" | "size">;
 
+const mimeTypeByExtension: Record<string, string> = {
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  gif: "image/gif",
+  webp: "image/webp",
+  wav: "audio/wav",
+  mp3: "audio/mpeg",
+  ogg: "audio/ogg",
+  mp4: "video/mp4",
+  webm: "video/webm",
+  ttf: "font/ttf",
+  otf: "font/otf",
+  woff: "font/woff",
+  woff2: "font/woff2",
+};
+
 class Service_Files implements IServiceInterface {
   private fontsList: GoogleFont[] = [];
   public readonly fileUrls = proxy<{ [id: string]: string }>({});
@@ -92,6 +109,11 @@ class Service_Files implements IServiceInterface {
 
   getFileUrl(fileId: string): string | undefined {
     return this.fileUrls[fileId];
+  }
+  // value for css properties like background-image: url("...") or "none" when the file is missing
+  getFileCssUrl(fileId: string): string {
+    const url = this.getFileUrl(fileId);
+    return url ? `url("${url.replace(/[\\"\r\n]/g, "\\$&")}")` : "none";
   }
   getFileData(fileId: string): FileState | undefined {
     return this.#filesMeta.find((file) => file.id === fileId);
@@ -175,17 +197,20 @@ class Service_Files implements IServiceInterface {
     if (!path || Array.isArray(path))
       return;
 
-    const splitPath = path.split(".");
-    const extension = splitPath.pop();
-    const fileName = splitPath.join(".").split("\\").pop() || "new file"
+    // windows paths use "\\", others "/"
+    const baseName = path.split(/[\\/]/).pop() || "";
+    const dotIndex = baseName.lastIndexOf(".");
+    const extension = dotIndex >= 0 ? baseName.substring(dotIndex + 1) : "";
+    const fileName = (dotIndex >= 0 ? baseName.substring(0, dotIndex) : baseName) || "new file";
 
     if (!extension)
       return;
 
     const data = await readBinaryFile(path);
 
-    let fileType = `${type}/${extension}`;
-    if (type === "font") {
+    // no type asked (all files): get it from the extension
+    const fileType = type ? `${type}/${extension}` : mimeTypeByExtension[extension.toLowerCase()] ?? "application/octet-stream";
+    if (fileType.startsWith("font/")) {
       this.installFonts([{
         family: fileName,
         weight: "900",
@@ -221,32 +246,40 @@ class Service_Files implements IServiceInterface {
   }
 
   removeFile(fileId: string) {
-    if (!this.getFileData(fileId)) return;
+    const file = this.getFileData(fileId);
+    if (!file) return;
 
     window.ApiClient.document.patch((state) => {
       const fileIndex = state.filesMeta.findIndex((f) => f.id === fileId);
-      for (let j = fileIndex + 1; j < state.filesMeta.length; j++)
-        this.#yFilesMeta.get(j).set("index", j - 1);
+      if (fileIndex < 0) return;
       state.filesMeta.splice(fileIndex, 1);
       window.ApiClient.document.fileArray.delete(fileIndex);
     });
+
+    // last file of a font family: the family is gone too
+    const family = file.type.startsWith("font/") ? file.meta?.family : undefined;
+    if (family && !this.#filesMeta.some(f => f.type.startsWith("font/") && f.meta?.family === family))
+      this.ui.fontFamilies = this.ui.fontFamilies.filter(f => f !== family);
   }
 
   uninstallFont(family: string) {
-    const ixs: number[] = [];
-    this.#filesMeta.forEach((file, i) => {
-      if (file.type.startsWith('font/') && file.meta?.family === family)
-        ixs.push(i);
-    });
+    // all font/* files of the target family, by id (the font files are not always next to each other)
+    const ids = this.#filesMeta
+      .filter(file => file.type.startsWith('font/') && (file.meta?.family === family || file.name === family))
+      .map(file => file.id);
 
     this.ui.fontFamilies = this.ui.fontFamilies.filter(f => f !== family);
 
-    ixs.length && window.ApiClient.document.file.transact(() => {
-      this.#yFilesMeta.delete(ixs[0], ixs.length);
-      this.#yFilesBinary.delete(ixs[0], ixs.length);
+    ids.length && window.ApiClient.document.file.transact(() => {
+      // from the end, so the indexes of the files still to delete stay valid
+      const filesMeta = this.#filesMeta;
+      for (let i = filesMeta.length - 1; i >= 0; i--) {
+        if (ids.includes(filesMeta[i].id)) {
+          this.#yFilesMeta.delete(i, 1);
+          this.#yFilesBinary.delete(i, 1);
+        }
+      }
     });
-
-    // find all font/* files with target family
   }
 }
 

@@ -282,7 +282,7 @@ interface EventProps extends InputBaseProps {
 }
 export const InputEvent: FC<EventProps> = memo(({ label, value, onChange }) => {
   const events = Array.from(window.ApiShared.pubsub.registeredEvents.values());
-  return <InputSelect options={events} label={label} defaultValue={value} onValueChange={e => onChange(e || "")} />
+  return <InputSelect options={events} label={label} value={value} onValueChange={e => onChange(e || "")} />
 });
 
 interface TextSourceProps extends InputBaseProps {
@@ -400,6 +400,8 @@ interface FontProps extends InputBaseProps {
   value: string,
   onChange: (value: string) => void
 }
+// quoted like client/elements/text/style.ts, so names with spaces, digits or quotes still preview
+const fontFamilyCss = (font: string) => `"${String(font ?? "").replace(/[\r\n]+/g, " ").replace(/["\\]/g, "\\$&")}"`;
 const FontSelectDropdown: FC<any> = memo(({ onChange, value }) => {
   const {t} = useTranslation();
   const [name, setName] = useState("");
@@ -420,7 +422,7 @@ const FontSelectDropdown: FC<any> = memo(({ onChange, value }) => {
       <input type="radio" name="font" value={value} checked={value === "Outfit"} onChange={e => onChange("Outfit")} className="radio radio-primary" />
     </label>
     {fonts.map((font, index) => <label key={font || index} className="flex justify-between items-center cursor-pointer">
-      <span className="label-text font-semibold" style={{ fontFamily: font }}>{font}</span>
+      <span className="label-text font-semibold" style={{ fontFamily: fontFamilyCss(font) }}>{font}</span>
       <input type="radio" name="font" value={value} checked={value === font} onChange={e => onChange(font)} className="radio radio-primary" />
     </label>)}
     <span className="text-xs text-primary font-bold font-header pt-4">{t('font_select.install_google')}</span>
@@ -435,7 +437,7 @@ const FontSelectDropdown: FC<any> = memo(({ onChange, value }) => {
 export const InputFont: FC<FontProps> = memo(({ label, ...rest }) => {
   return <Dropdown targetOffset={24} placement="right" content={<FontSelectDropdown {...rest} />}>
     <InputContainer label={label}>
-      <div style={{ fontFamily: rest.value || "inherit" }} className="cursor-pointer hover:bg-base-300 flex items-center input input-bordered input-sm field-width overflow-hidden" title={rest.value}>
+      <div style={{ fontFamily: rest.value ? fontFamilyCss(rest.value) : "inherit" }} className="cursor-pointer hover:bg-base-300 flex items-center input input-bordered input-sm field-width overflow-hidden" title={rest.value}>
         <span className="truncate block w-full">{rest.value || "Select font"}</span>
       </div>
     </InputContainer>
@@ -602,12 +604,16 @@ interface AudioOutputProps extends InputBaseProps {
 }
 
 const getMedia = async () => {
+  let stream: MediaStream | undefined;
   try {
-    await navigator.mediaDevices.getUserMedia({audio: true,});
+    stream = await navigator.mediaDevices.getUserMedia({audio: true,});
     const list = await navigator.mediaDevices.enumerateDevices();
     return list.filter(d => d.kind === "audioinput").map(d => ({ ...d, label: d.label, value: d.deviceId }))
   } catch (error) {
     return []
+  } finally {
+    // the stream was only needed to get the device names: release the microphone
+    stream?.getTracks().forEach(track => track.stop());
   }
 }
 
@@ -615,7 +621,9 @@ export const InputWebAudioInput: FC<AudioOutputProps> = memo(({ label, value, on
   const [devices, setDevices] = useState<InputSelectOption[]>([]);
   
   useEffect(() => {
-    getMedia().then(setDevices);
+    let unmounted = false;
+    getMedia().then(list => !unmounted && setDevices(list));
+    return () => { unmounted = true };
   }, []);
 
   return <InputSelect

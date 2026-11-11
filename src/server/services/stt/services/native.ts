@@ -14,11 +14,10 @@ export class STT_NativeService implements ISTTService {
   
   #processResults = (event: any) => {
     let interim_transcript = "";
-    let final_transcript = "";
     for (let i = event.resultIndex; i < event.results.length; ++i) {
       if (event.results[i].isFinal) {
-        final_transcript += event.results[i][0].transcript;
-        this.bindings.onFinal(final_transcript);
+        // each final result once, not joined with the ones before it
+        this.bindings.onFinal(event.results[i][0].transcript);
       } else {
         interim_transcript += event.results[i][0].transcript;
         this.bindings.onInterim(interim_transcript);

@@ -23,13 +23,11 @@ pub fn path(mut input: mpsc::Receiver<String>, output: mpsc::Sender<String>) -> 
 
     let input_peers = peers.clone();
     tauri::async_runtime::spawn(async move {
-        loop {
-            if let Some(input) = input.recv().await {
-                let p = input_peers.read().await;
-                let str = input.as_str();
-                for peer in p.values() {
-                    peer.send(Ok(Message::text(str))).ok();
-                }
+        while let Some(msg) = input.recv().await {
+            let p = input_peers.read().await;
+            let str = msg.as_str();
+            for peer in p.values() {
+                peer.send(Ok(Message::text(str))).ok();
             }
         }
     });
@@ -37,11 +35,17 @@ pub fn path(mut input: mpsc::Receiver<String>, output: mpsc::Sender<String>) -> 
     let peers = warp::any().map(move || peers.clone());
     let output = warp::any().map(move || output.clone());
     let t = warp::path("pubsub")
+        .and(super::ws_origin_allowed())
         .and(warp::ws())
         .and(peers)
         .and(output)
         .and(warp::query::<PeerQueryData>())
-        .map(|ws: Ws, peers, output, q| ws.on_upgrade(move |socket| peer_handler(socket, peers, output, q)))
+        .map(|origin_ok: bool, ws: Ws, peers, output, q| {
+            if !origin_ok {
+                return super::forbidden_origin();
+            }
+            ws.on_upgrade(move |socket| peer_handler(socket, peers, output, q)).into_response()
+        })
         .boxed();
     t
 }
@@ -53,18 +57,25 @@ pub async fn peer_handler(ws: WebSocket, peers: Peers, output: mpsc::Sender<Stri
     let rx = UnboundedReceiverStream::new(rx);
     tauri::async_runtime::spawn(rx.forward(peer_tx));
 
-    if peers.read().await.contains_key(&query.id) {
-        println!("already registered");
-        return;
+    {
+        // check and insert under one lock, so two clients can't both take the same id
+        let mut p = peers.write().await;
+        if p.contains_key(&query.id) {
+            println!("already registered");
+            return;
+        }
+        p.insert(query.id.clone(), tx);
     }
-
-    peers.write().await.insert(query.id.clone(), tx);
 
     while let Some(result) = peer_rx.next().await {
         let Ok(msg) = result else {
             break;
         };
-        let Ok(msg_str) = msg.to_str() else {break};
+        if msg.is_close() {
+            break;
+        }
+        // ping, pong and binary frames are not messages, keep the connection
+        let Ok(msg_str) = msg.to_str() else { continue };
         output.send(msg_str.to_string()).await.ok();
         let p = peers.read().await;
         for (id, peer) in p.iter() {

@@ -1,50 +1,45 @@
-name: 'release'
-
+name: 'build'
 on:
   workflow_dispatch:
+  push:
 
 jobs:
   build:
-    permissions:
-      contents: write
-    strategy:
-      fail-fast: false
-
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
       - name: setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
+          node-version: 20
+
+      # pnpm-lock.yaml is lockfile v9
+      - name: install pnpm
+        uses: pnpm/action-setup@v4
         with:
-          version: 7.28.0
-      - uses: SebRollen/toml-action@v1.0.1
-        id: version
-        with:
-          file: 'src-tauri/Cargo.toml'
-          field: 'package.version'
-      - run: echo ${{steps.version.outputs.value}}
+          version: 9
+
+      # pinned: the locked "time" crate (0.3.30) does not compile on Rust 1.80 and newer
       - name: setup rust
-        uses: dtolnay/rust-toolchain@stable
-      - name: setup pnpm deps
-        run: pnpm i
-      - name: compile
+        uses: dtolnay/rust-toolchain@1.79.0
+
+      - name: install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # no Twitch client id is built in: everyone enters their own in the app (Twitch tab)
+      - name: build
         run: pnpm tauri build
         env:
-          CURSES_TWITCH_CLIENT_ID: ${{secrets.CURSES_TWITCH_CLIENT_ID}}
+          CURSES_TWITCH_CLIENT_ID: ${{ secrets.CURSES_TWITCH_CLIENT_ID }}
 
-      - name: create release
-        uses: softprops/action-gh-release@v1
-#        if: ${{startsWith(github.ref, 'refs/tags/') }}
+      # download from the run page (Actions tab)
+      - name: upload
+        uses: actions/upload-artifact@v4
         with:
-          name: Release ${{steps.version.outputs.value}}
-          tag_name: v${{steps.version.outputs.value}}
-          draft: true
-          generate_release_notes: true
-          fail_on_unmatched_files: true
-          files: |
+          # one download per branch: curses-fixes, curses-features
+          name: curses-${{ github.ref_name }}
+          if-no-files-found: error
+          path: |
             src-tauri/target/release/curses.exe
-            src-tauri/target/release/bundle/msi/curses_${{steps.version.outputs.value}}_x64_en-US.msi
+            src-tauri/target/release/bundle/msi/*.msi

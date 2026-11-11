@@ -3,9 +3,19 @@ import {
   SpeechSynthesisOutputFormat,
   SpeechSynthesizer
 } from "microsoft-cognitiveservices-speech-sdk";
-import { isEmptyValue } from "../../../../utils";
+import { isEmptyValue, parseFloatOr } from "../../../../utils";
 import { TTS_State } from "../schema";
 import { ITTSReceiver, ITTSService } from "../types";
+
+// escape text and attribute values for SSML (xml)
+function escapeXml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
 
 export class TTS_AzureService implements ITTSService {
   constructor(private bindings: ITTSReceiver) {}
@@ -43,9 +53,9 @@ export class TTS_AzureService implements ITTSService {
   play(value: string): void {
     const ssml = `
     <speak version="1.0" xmlns="https://www.w3.org/2001/10/synthesis" xml:lang="en-US">
-      <voice name="${this.state.voice}" ${this.state.voiceStyle ? `style="${this.state.voiceStyle}"` : ''} ${this.state.voiceRole ? `role="${this.state.voiceRole}"` : ''}>
-      <prosody volume="${this.state.voiceVolume || "default"}" rate="${this.state.voiceRate || "default"}" pitch="${this.state.voicePitch || "default"}" range="${this.state.voiceRange || "default"}">
-        ${value}
+      <voice name="${escapeXml(this.state.voice)}" ${this.state.voiceStyle ? `style="${escapeXml(this.state.voiceStyle)}"` : ''} ${this.state.voiceRole ? `role="${escapeXml(this.state.voiceRole)}"` : ''}>
+      <prosody volume="${escapeXml(this.state.voiceVolume || "default")}" rate="${escapeXml(this.state.voiceRate || "default")}" pitch="${escapeXml(this.state.voicePitch || "default")}" range="${escapeXml(this.state.voiceRange || "default")}">
+        ${escapeXml(value)}
       </prosody>
       </voice>
     </speak>
@@ -53,8 +63,8 @@ export class TTS_AzureService implements ITTSService {
     value &&
     this.#instance?.speakSsmlAsync(ssml, result => {
       window.ApiServer.sound.enqueueVoiceClip(result.audioData, {
-        volume: parseFloat(this.state.volume) ?? 1,
-        rate: parseFloat(this.state.rate) ?? 1,
+        volume: parseFloatOr(this.state.volume, 1),
+        rate: parseFloatOr(this.state.rate, 1),
         device_name: this.state.device
       });
     },

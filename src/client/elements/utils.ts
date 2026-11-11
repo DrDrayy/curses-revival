@@ -6,37 +6,51 @@ export type StyleEvent = {
   duration: number;
 };
 
+// replace [file-<id>] references with the url of that file
+export function CssReplaceFileReference(style: string): string;
+export function CssReplaceFileReference(style: unknown): unknown;
 export function CssReplaceFileReference(style: unknown) {
   if (typeof style !== "string") return style;
 
-  const newStyle = Array.from(style.matchAll(/\[file-.*?\]/g));
-  // .reduce((sum, file) => {
-  //   const requestedFileId = file[0].substring(6, file[0].length-1);
-  //   const url = window.API.files.getFileUrl(requestedFileId);
-  //   return url ? sum.replace(file[0], url) : sum;
-  // }, style);
-
-  return newStyle;
+  return style.replace(/\[file-(.*?)\]/g, (reference, fileId: string) =>
+    window.ApiClient.files.getFileUrl(fileId) ?? reference);
 }
 
 function extractEventsFromStyle(style: unknown): StyleEvent[] {
   if (typeof style !== "string") return [];
 
+  // "event-element-<id>-100" -> event "element.<id>", duration 100
+  // event names use "." where the style uses "-", but ids can contain "-" and "_" themselves,
+  // so only the prefix and a trailing number are taken off and the id is kept as it is
   function processEvent(
     styleEvent: string,
     removePrefix?: boolean
   ): StyleEvent {
-    const s = styleEvent.split("-");
+    let name = removePrefix ? styleEvent.replace(/^event-/, "") : styleEvent;
 
-    const duration = parseInt(s.at(-1) || "");
+    // remove duration if it has any
+    let duration = 0;
+    const durationMatch = name.match(/-(\d+)$/);
+    if (durationMatch) {
+      duration = parseInt(durationMatch[1]);
+      name = name.substring(0, durationMatch.index);
+    }
 
-    removePrefix && s.shift(); // remove prefix 'event-'
-    !isNaN(duration) && s.pop(); // remove duration if it has any
     return {
-      event: s.join("."),
+      event: eventNameFromStyle(name),
       attribute: styleEvent,
       duration: duration || 0,
     };
+  }
+
+  function eventNameFromStyle(name: string) {
+    // known events first (they can have any number of dots)
+    for (const registered of window.ApiShared.pubsub.registeredEvents.values()) {
+      if (registered.value.replace(/\./g, "-") === name)
+        return registered.value;
+    }
+    // else the first "-" separates the group: "element-<id>" -> "element.<id>"
+    return name.replace("-", ".");
   }
 
   // find everything with pattern [*]
@@ -95,6 +109,13 @@ export class StyleToEventController {
     this.ExtractStyleEvents(css);
     this.ReApplyStyleEvents();
     this.NotifyAttributes();
+  }
+
+  public dispose() {
+    this.activeStyleSubs.forEach(sub => window.ApiShared.pubsub.unsubscribe(sub));
+    this.activeStyleSubs = [];
+    Object.keys(this.activeAttributes).forEach(attribute => this.clearAttribute(attribute));
+    this.currentStyleEvents = [];
   }
 
   private ReApplyStyleEvents() {

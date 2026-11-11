@@ -95,6 +95,8 @@ const Inspector_Settings: FC = memo(() => {
 
   const handleChangeScale = (v: string | number) => {
     const _v = typeof v === "string" ? parseFloat(v) : v;
+    if (!Number.isFinite(_v))
+      return;
     window.ApiServer.changeScale(Math.max(UI_SCALE_MIN, Math.min(UI_SCALE_MAX, _v)));
   }
 
@@ -161,6 +163,7 @@ const Inspector_Settings: FC = memo(() => {
       </Inspector.Deactivatable>
       <ServiceButton startLabel="common.btn_connect" stopLabel="common.btn_disconnect" status={linkStatus} onStart={() => window.ApiShared.pubsub.linkConnect()} onStop={() => window.ApiShared.pubsub.linkDisconnect()} />
       <button className="btn btn-sm btn-ghost" onClick={() => window.ApiShared.pubsub.copyLinkAddress()}>{t('settings.btn_copy_address')}</button>
+
 
     </Inspector.Content>
   </Inspector.Body>

@@ -21,9 +21,14 @@ export class Translation_AzureService implements ITranslationService {
     return window.ApiServer.state.services.translation.data.azure;
   }
 
-  async translate(id: number, text: TextEvent) {
+  translate(id: number, text: TextEvent): boolean {
     if (text.type === TextEventType.interim && !this.state.interim)
-      return;
+      return false;
+    this.#request(id, text).catch(() => {});
+    return true;
+  }
+
+  async #request(id: number, text: TextEvent) {
     let key = this.state.key;
     let location = this.state.location;
 

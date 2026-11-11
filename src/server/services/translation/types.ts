@@ -14,6 +14,7 @@ export interface ITranslationServiceConstructor {
 export interface ITranslationService {
   start(params: Translation_State): void;
   stop(): void;
-  translate(id: number, value: TextEvent): void;
+  // false if nothing was sent (e.g. interim text is turned off)
+  translate(id: number, value: TextEvent): boolean;
   dispose(): void;
 }

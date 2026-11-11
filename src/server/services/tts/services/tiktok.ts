@@ -1,4 +1,4 @@
-import { decodeB64toArrayBuffer, isEmptyValue } from "../../../../utils";
+import { decodeB64toArrayBuffer, isEmptyValue, parseFloatOr } from "../../../../utils";
 import { TTS_State } from "../schema";
 import { ITTSReceiver, ITTSService } from "../types";
 
@@ -35,8 +35,8 @@ export class TTS_TikTokService implements ITTSService {
     let data = await response.json();
     if (data?.success === true) {
       window.ApiServer.sound.enqueueVoiceClip(decodeB64toArrayBuffer(data.data), {
-        volume: parseFloat(this.state.volume) ?? 1,
-        rate: parseFloat(this.state.rate) ?? 1,
+        volume: parseFloatOr(this.state.volume, 1),
+        rate: parseFloatOr(this.state.rate, 1),
         device_name: this.state.device
       });
     }

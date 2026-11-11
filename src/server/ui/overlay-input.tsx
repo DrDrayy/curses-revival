@@ -60,14 +60,14 @@ const OverlayInput: FC<{ onClose: () => void }> = forwardRef(({ onClose }, ref: 
   const [inputValue, setInputValue] = useState("");
 
   const submit = () => {
-    window.ApiShared.pubsub.publishText(TextEventSource.textfield, { type: TextEventType.final, value: inputValue });
+    // nothing to send when the box is empty, but still clear it
+    inputValue && window.ApiShared.pubsub.publishText(TextEventSource.textfield, { type: TextEventType.final, value: inputValue });
     setInputValue("");
   }
 
   const handleChange = (value: string) => {
-    window.ApiShared.pubsub.publishText(TextEventSource.textfield, { type: TextEventType.interim, value: inputValue });
+    window.ApiShared.pubsub.publishText(TextEventSource.textfield, { type: TextEventType.interim, value });
     setInputValue(value);
-
   };
 
   const insertLog = (value: string) => {

@@ -13,6 +13,9 @@ export class STT_DeepgramService implements ISTTService {
 
   private socket?: WebSocket;
   private recorder?: MediaRecorder;
+  private stream?: MediaStream;
+  // stop() was called, a late microphone must not be used
+  private stopped = false;
 
   get state() {
     return window.ApiServer.state.services.stt.data.deepgram
@@ -23,10 +26,17 @@ export class STT_DeepgramService implements ISTTService {
     if (Object.values(state.deepgram).some(isEmptyValue))
       return this.bindings.onStop("Options missing");
 
+    this.stopped = false;
     navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: this.state.device}}}).then((stream) => {
+      // stopped while the microphone was starting: release it, don't connect
+      if (this.stopped) {
+        stream.getTracks().forEach(t => t.stop());
+        return;
+      }
+      this.stream = stream;
       this.recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
       this.socket = new WebSocket(
-        `wss://api.deepgram.com/v1/listen?punctuate=${!!state.deepgram.punctuate}&interim_results=${!!state.deepgram.interim}&language=${state.deepgram.language}&tier=${state.deepgram.tier}`,
+        `wss://api.deepgram.com/v1/listen?punctuate=${!!state.deepgram.punctuate}&interim_results=${!!state.deepgram.interim}&language=${state.deepgram.language}&tier=${state.deepgram.tier}&profanity_filter=${!!state.deepgram.profanity}`,
         ["token", state.deepgram.key]
       );
 
@@ -63,6 +73,12 @@ export class STT_DeepgramService implements ISTTService {
         else
           this.bindings.onStop(ev.code === 1006 ? "" : "[Deepgram] Unexpected error");
       };
+    }).catch((error: any) => {
+      // microphone not found or access denied (or setup failed)
+      this.stopSocket();
+      this.stopRecorder();
+      if (!this.stopped)
+        this.bindings.onStop(`[Deepgram] ${error?.message || "Can't use the microphone"}`);
     });
   }
 
@@ -70,14 +86,21 @@ export class STT_DeepgramService implements ISTTService {
     this.socket?.close();
   }
   stopRecorder() {
-    if (this.recorder && this.recorder?.state !== "inactive") {
+    if (this.recorder && this.recorder?.state !== "inactive")
       this.recorder?.stop();
-      this.recorder = undefined;
-    }
+    this.recorder = undefined;
+    // release the microphone
+    this.stream?.getTracks().forEach(t => t.stop());
+    this.stream = undefined;
   }
 
   stop(): void {
+    this.stopped = true;
+    const hadSocket = !!this.socket;
     this.stopSocket();
     this.stopRecorder();
+    // no socket yet, so nothing will report the stop
+    if (!hadSocket)
+      this.bindings.onStop();
   }
 }

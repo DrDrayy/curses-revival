@@ -2,7 +2,8 @@ import {
   IServiceInterface,
   ServiceNetworkState,
   TextEvent,
-  TextEventSource
+  TextEventSource,
+  TextEventType
 } from "@/types";
 import { serviceSubscibeToInput } from "@/utils";
 import { toast } from "react-toastify";
@@ -35,7 +36,12 @@ class Service_Translation implements IServiceInterface, ITranslationReceiver {
     status: ServiceNetworkState.disconnected,
     error: "",
   });
+  // id of the next request
   #id = 0;
+  // id of the newest translation shown so far
+  #lastShownId = -1;
+  // id of the newest final translation shown so far
+  #lastFinalShownId = -1;
 
   #serviceInstance!: ITranslationService;
   get data() {
@@ -98,8 +104,14 @@ class Service_Translation implements IServiceInterface, ITranslationReceiver {
     this.#setStatus(ServiceNetworkState.disconnected);
   }
   onTranslation(id: number, e: TextEvent, value: string): void {
-    // ignore late results
-    if (this.#id - 1 !== id) return;
+    // interim results older than anything shown are dropped; a final is dropped only when a newer
+    // final is already shown (it would come out of order), never because of a newer interim
+    if (e.type === TextEventType.interim && id < this.#lastShownId) return;
+    if (e.type === TextEventType.final) {
+      if (id < this.#lastFinalShownId) return;
+      this.#lastFinalShownId = id;
+    }
+    this.#lastShownId = Math.max(this.#lastShownId, id);
     window.ApiShared.pubsub.publishText(TextEventSource.translation, {
       value,
       type: e.type,
@@ -132,8 +144,9 @@ class Service_Translation implements IServiceInterface, ITranslationReceiver {
       this.serviceState.status !== ServiceNetworkState.connected
     )
       return;
-    this.#serviceInstance.translate(this.#id, text);
-    this.#id++;
+    // count only requests that were really sent
+    if (this.#serviceInstance.translate(this.#id, text))
+      this.#id++;
   }
 }
 

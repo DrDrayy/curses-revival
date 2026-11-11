@@ -68,6 +68,7 @@ class Service_Elements implements IServiceInterface {
 
     if (type === ElementType.text)
       this.#registerElementEvent(id, elements[id].name);
+    return id;
   }
 
   removeElement(id: string) {

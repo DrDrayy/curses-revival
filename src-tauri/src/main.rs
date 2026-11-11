@@ -35,7 +35,7 @@ fn get_native_features() -> NativeFeatures {
 }
 
 #[command]
-fn get_port(state: State<'_, InitArguments>) -> u16 {
+fn get_port(state: State<'_, AppConfiguration>) -> u16 {
     state.port
 }
 
@@ -59,10 +59,12 @@ fn main() {
     match port_availability {
         Ok(l) => l.set_nonblocking(true).unwrap(),
         Err(_err) => {
+            // MessageBoxA needs a NUL-terminated string that outlives the call
+            let text = format!("Port {} is not available!\0", args.port);
             unsafe {
                 MessageBoxA(
                     None,
-                    PCSTR(format!("Port {} is not available!", args.port).as_ptr()),
+                    PCSTR(text.as_ptr()),
                     s!("Curses error"),
                     MB_OK | MB_ICONWARNING,
                 );

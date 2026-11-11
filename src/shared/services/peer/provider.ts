@@ -12,6 +12,8 @@ export class PeerjsProvider extends EventTarget {
 
   #peer?: Peer;
   private peers: { [id: string]: DataConnection } = {};
+  // same function reference for on() and off()
+  private updateHandler = (update: Uint8Array) => this.broadcastUpdate(this.serializeUpdate(update));
 
   connectServer(params: {
     id: string,
@@ -19,7 +21,7 @@ export class PeerjsProvider extends EventTarget {
     port: string
   }) {
     // track document update
-    this.document.on("update", update => this.broadcastUpdate(this.serializeUpdate(update)));
+    this.document.on("update", this.updateHandler);
     this.#peer = new Peer(params.id, {
       host: params.host,
       port:   parseInt(params.port),
@@ -79,7 +81,7 @@ export class PeerjsProvider extends EventTarget {
   }
 
   dispose() {
-    this.document.off("update", (update: any) => this.broadcastUpdate(this.serializeUpdate(update)));
+    this.document.off("update", this.updateHandler);
     this.#peer?.destroy();
   }
 

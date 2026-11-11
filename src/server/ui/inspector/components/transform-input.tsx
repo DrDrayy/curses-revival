@@ -9,9 +9,16 @@ const TransformInput: FC<{id: string}> = ({id}) => {
   const rect = useGetState(state => state.elements[id].scenes[activeScene]?.rect);
   const update = useUpdateState();
 
-  const handleUpdate = (key: keyof TransformRect, value: string) => update(state => {
-    state.elements[id].scenes[activeScene].rect[key] = parseFloat(value);
-  });
+  const handleUpdate = (key: keyof TransformRect, value: string) => {
+    const number = parseFloat(value);
+    // empty or invalid field: keep the last valid value
+    if (!Number.isFinite(number))
+      return;
+    update(state => {
+      const rect = state.elements[id]?.scenes[activeScene]?.rect;
+      rect && (rect[key] = number);
+    });
+  };
 
   return <>
     <InputDoubleCountainer label="common.field_position">

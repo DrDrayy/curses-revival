@@ -1,4 +1,5 @@
 import { invoke }                                          from "@tauri-apps/api/tauri";
+import { subscribeKey }                                    from "valtio/utils";
 import { IServiceInterface, TextEventType }                from "@/types";
 import { serviceSubscibeToInput, serviceSubscibeToSource } from "../../../utils";
 import { VRC_Backends }                                    from "./schema";
@@ -27,6 +28,10 @@ class Service_VRC implements IServiceInterface {
   async init() {
     this.targets.textbox = new VRC_TextboxTarget();
     this.targets.killfrenzy = new VRC_KillFrenzyTarget();
+    // switched off or to the other target: messages still waiting must not keep going out
+    const cancelAll = () => Object.values(this.targets).forEach(target => target?.cancel());
+    subscribeKey(this.#state, "enable", enabled => !enabled && cancelAll());
+    subscribeKey(this.#state, "target", () => cancelAll());
     serviceSubscibeToSource(this.#state, "source", (data) => {
       if (!this.#state.enable || !data) return;
       if (data.type === TextEventType.final) {

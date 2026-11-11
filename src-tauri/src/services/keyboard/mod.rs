@@ -151,9 +151,9 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             });
             let handle = app.app_handle();
             tauri::async_runtime::spawn(async move {
-                loop {
-                    if let Some(output) = pubsub_output_rx.recv().await {
-                        handle.emit_all("keyboard", output).unwrap();
+                while let Some(output) = pubsub_output_rx.recv().await {
+                    if let Err(err) = handle.emit_all("keyboard", output) {
+                        eprintln!("keyboard: unable to send the key to the app: {}", err);
                     }
                 }
             });

@@ -44,12 +44,15 @@ class Service_TTS implements IServiceInterface, ITTSReceiver {
   }
 
   runReplacements(value: string) {
-    if (this.#_wordReplacementsCache.isEmpty)
-      return value;
-    return value.replace(this.#_wordReplacementsCache.regexp, v => {
-      const _v = this.data.replaceWordsIgnoreCase ? v.toLowerCase() : v;
-      return this.#_wordReplacementsCache.map[_v];
-    }).replace(/[<>]/gi, ""); // clear ssml tags
+    const cache = this.#_wordReplacementsCache;
+    let result = value;
+    if (cache && !cache.isEmpty) {
+      result = result.replace(cache.regexp, v => {
+        // keys are trimmed (and lowercased when ignoring case) in the cache
+        return cache.map[cache.ignoreCase ? v.toLowerCase() : v] ?? v;
+      });
+    }
+    return result.replace(/[<>]/g, ""); // clear ssml tags, always
   }
 
   async init() {

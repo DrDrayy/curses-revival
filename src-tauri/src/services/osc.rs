@@ -14,7 +14,8 @@ pub struct OscPlugin {
 
 impl Default for OscPlugin {
     fn default() -> Self {
-        let Ok(socket) = UdpSocket::bind("127.0.0.1:3400") else {
+        // any free port to send from: a fixed one may be taken by another app
+        let Ok(socket) = UdpSocket::bind("127.0.0.1:0") else {
             return Self { socket: None };
         };
         OscPlugin { socket: Some(socket) }
@@ -42,8 +43,16 @@ impl OscPlugin {
             })
             .collect();
 
-        let msg_buf = encoder::encode(&OscPacket::Message(OscMessage { addr: rpc.path, args })).unwrap();
-        socket.send_to(&msg_buf, addr).unwrap();
+        let msg_buf = match encoder::encode(&OscPacket::Message(OscMessage { addr: rpc.path, args })) {
+            Ok(buf) => buf,
+            Err(err) => {
+                eprintln!("osc: unable to encode the message: {:?}", err);
+                return;
+            }
+        };
+        if let Err(err) = socket.send_to(&msg_buf, addr) {
+            eprintln!("osc: unable to send the message: {}", err);
+        }
     }
 }
 

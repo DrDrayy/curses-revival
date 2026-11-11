@@ -73,6 +73,7 @@ export class STT_SpeechlyService implements ISTTService {
   }
 
   stop(): void {
+    clearTimeout(this.#connectTimeout);
     this.#microphone?.close();
     this.#instance?.close();
     this.bindings.onStop()

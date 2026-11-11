@@ -42,14 +42,22 @@ const Inspector_Scenes: FC = () => {
 
   const updateState = useUpdateState();
 
+  const handleCanvasSize = (key: "w" | "h", value: string) => {
+    const number = parseFloat(value);
+    // empty or invalid field: keep the last valid value
+    if (!Number.isFinite(number))
+      return;
+    updateState(state => { state.canvas[key] = number });
+  }
+
   // create scene
   return <Inspector.Body>
     <Inspector.Header><RiStackFill /> {t('scenes.title')}</Inspector.Header>
     <Inspector.Content>
       <Inspector.SubHeader>{t('scenes.section_canvas')}</Inspector.SubHeader>
       <InputDoubleCountainer label="scenes.field_canvas_size">
-        <InputBaseText value={canvas?.w} onChange={e => updateState(state => { state.canvas.w = parseFloat(e.target.value) })} type="number"/>
-        <InputBaseText value={canvas?.h} onChange={e => updateState(state => { state.canvas.h = parseFloat(e.target.value) })} type="number"/>
+        <InputBaseText value={canvas?.w} onChange={e => handleCanvasSize("w", e.target.value)} type="number"/>
+        <InputBaseText value={canvas?.h} onChange={e => handleCanvasSize("h", e.target.value)} type="number"/>
       </InputDoubleCountainer>
 
       <Inspector.SubHeader>{t('scenes.section_scenes')}</Inspector.SubHeader>

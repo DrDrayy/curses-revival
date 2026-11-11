@@ -89,26 +89,24 @@ class Service_STT implements IServiceInterface, ISTTReceiver {
   }
 
   runReplacements(value: string) {
-    if (this.#_wordReplacementsCache.isEmpty)
+    const cache = this.#_wordReplacementsCache;
+    if (!cache || cache.isEmpty)
       return value;
-    return value.replace(this.#_wordReplacementsCache.regexp, v => {
-      if (this.data.replaceWordsIgnoreCase) {
-        let _v = v.toLowerCase();
-        if (this.data.replaceWordsPreserveCase) {
-          const isUppercase = v[0] === v[0].toUpperCase();
-          let replacement = this.#_wordReplacementsCache.map[_v];
-          
+    return value.replace(cache.regexp, v => {
+      // keys are trimmed (and lowercased when ignoring case) in the cache
+      let replacement = cache.map[cache.ignoreCase ? v.toLowerCase() : v];
+      if (replacement === undefined)
+        return v;
+      if (cache.ignoreCase && this.data.replaceWordsPreserveCase && replacement) {
+        const first = v[0];
+        // only follow the case of the first letter, symbols/digits have none
+        if (first.toUpperCase() !== first.toLowerCase()) {
+          const isUppercase = first === first.toUpperCase();
           const vCase = isUppercase ? replacement[0].toUpperCase() : replacement[0].toLowerCase();
           replacement = vCase + replacement.slice(1);
-          return replacement;
-        }
-        else {
-          return this.#_wordReplacementsCache.map[_v];
         }
       }
-
-      let _v = this.data.replaceWordsIgnoreCase ? v.toLowerCase() : v;
-      return this.#_wordReplacementsCache.map[_v];
+      return replacement;
     });
   }
 

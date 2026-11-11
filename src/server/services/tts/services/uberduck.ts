@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/tauri";
-import { isEmptyValue } from "../../../../utils";
+import { isEmptyValue, parseFloatOr } from "../../../../utils";
 import { TTS_State } from "../schema";
 import { ITTSReceiver, ITTSService } from "../types";
 
@@ -25,8 +25,8 @@ export class TTS_UberduckService implements ITTSService {
           secret_key: this.state.secret_key,
         },
         text: value,
-        device_name: "Headphones (Realtek(R) Audio)",
-        volume: parseFloat(this.state.volume) || 1,
+        device_name: this.state.device,
+        volume: parseFloatOr(this.state.volume, 1),
         voicemodel_uuid: this.state.voice,
       },
     });

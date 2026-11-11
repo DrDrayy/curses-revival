@@ -1,4 +1,3 @@
-use futures::TryFutureExt;
 use serde::{Deserialize, Serialize};
 use tauri::{
     command,
@@ -37,24 +36,28 @@ struct SynthRequest {
     voicemodel_uuid: String,
 }
 
+fn http_error(status: reqwest::StatusCode) -> String {
+    format!("Uberduck request failed (HTTP {})", status.as_u16())
+}
+
 #[command]
 async fn get_voices(auth: UberDuckAuth) -> Result<Vec<Voice>, String> {
     let client = reqwest::Client::new();
-    if let Ok(voices) = client.get("https://api.uberduck.ai/voices?mode=tts-all")
+    let resp = client.get("https://api.uberduck.ai/voices?mode=tts-all")
         .basic_auth(auth.api_key, Some(auth.secret_key))
         .send()
-        .and_then(|f| f.json::<Vec<Voice>>()).await {
-            Ok(voices)
+        .await
+        .map_err(|err| format!("Unable to load voices: {}", err))?;
+    if !resp.status().is_success() {
+        return Err(http_error(resp.status()));
     }
-    else {
-        Err("Unable to load voices".to_string())
-    }
+    resp.json::<Vec<Voice>>().await.map_err(|_| "Unable to load voices".to_string())
 }
 
 #[command]
 async fn speak(data: UberduckRequest) -> Result<(), String> {
     let client = reqwest::Client::new();
-    if let Ok(resp) = client
+    let resp = client
         .post("https://api.uberduck.ai/speak-synchronous")
         .basic_auth(data.auth.api_key, Some(data.auth.secret_key))
         .json(&SynthRequest {
@@ -62,18 +65,19 @@ async fn speak(data: UberduckRequest) -> Result<(), String> {
             voicemodel_uuid: data.voicemodel_uuid,
         })
         .send()
-        .and_then(|f| f.bytes()).await {
-            play_async(RpcAudioPlayAsync {
-                device_name: data.device_name,
-                data: resp.to_vec(),
-                volume: data.volume,
-                rate: 1.0,
-            })
-            .await
-        }
-    else {
-        Err("Request failed".to_string())
+        .await
+        .map_err(|err| format!("Request failed: {}", err))?;
+    if !resp.status().is_success() {
+        return Err(http_error(resp.status()));
     }
+    let audio = resp.bytes().await.map_err(|err| format!("Unable to read the audio: {}", err))?;
+    play_async(RpcAudioPlayAsync {
+        device_name: data.device_name,
+        data: audio.to_vec(),
+        volume: data.volume,
+        rate: 1.0,
+    })
+    .await
 }
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {

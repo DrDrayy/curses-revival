@@ -16,20 +16,24 @@ class TwitchChatApi {
   });
 
   async connect(username: string, authProvider: AuthProvider) {
-    if (this.state.connection !== ServiceNetworkState.disconnected)
+    // one client at a time, also while the first one is still connecting
+    if (this.chatClient || this.state.connection !== ServiceNetworkState.disconnected)
       return;
-    this.chatClient = new ChatClient({ authProvider, channels: [username] });
-    this.chatClient.irc.onConnect(() => {
+    const client = new ChatClient({ authProvider, channels: [username] });
+    this.chatClient = client;
+    client.irc.onConnect(() => {
+      if (this.chatClient !== client) return;
       this.state.username = username;
       this.state.connection = ServiceNetworkState.connected;
     });
 
-    this.chatClient.irc.onDisconnect(() => {
+    client.irc.onDisconnect(() => {
+      if (this.chatClient !== client) return;
       this.state.username = "";
       this.state.connection = ServiceNetworkState.disconnected;
     });
 
-    this.chatClient.onMessage((channel, user, message, msg) => {
+    client.onMessage((channel, user, message, msg) => {
       if (msg.userInfo.userName !== this.state.username) return;
 
       if (this.#state.data.chatReceiveEnable) {
@@ -41,11 +45,24 @@ class TwitchChatApi {
       }
     });
 
-    await this.chatClient.connect();
+    try {
+      await client.connect();
+    } catch (error) {
+      // let the next connect() start over
+      if (this.chatClient === client) {
+        this.chatClient = undefined;
+        this.state.username = "";
+        this.state.connection = ServiceNetworkState.disconnected;
+      }
+    }
   }
 
   disconnect() {
-    this.chatClient?.quit();
+    const client = this.chatClient;
+    this.chatClient = undefined;
+    client?.quit();
+    this.state.username = "";
+    this.state.connection = ServiceNetworkState.disconnected;
   }
 
   dispose() {

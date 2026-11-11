@@ -50,7 +50,8 @@ const Divider: FC = () => {
 const AddElementsMenu: FC = () => {
   const {t} = useTranslation();
   const handleAdd = (type: ElementType) => {
-    window.ApiClient.elements.addElement(type);
+    // only the scene that is open now (adding to "main" too could put an empty box on the live OBS scene)
+    window.ApiClient.elements.addElement(type, window.ApiClient.scenes.state.activeScene);
   }
   return (
     <ul className="dropdown p-2">

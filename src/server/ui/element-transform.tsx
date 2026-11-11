@@ -6,6 +6,8 @@ import { FC, memo, useEffect, useState, MouseEvent as ReactMouseEvent } from "re
 import { useDebounce } from "react-use";
 import { useSnapshot } from "valtio";
 
+const MIN_SIZE = 10; // smallest width and height (px) when resizing
+
 type TransformDirection = 'n' | 'e' | 's' | 'w' | 'nw' | 'ne' | 'se' | 'sw' | 'm';
 
 function compareRect(a?: TransformRect, b?: TransformRect) {
@@ -25,8 +27,10 @@ export const ElementEditorTransform: FC<{ id: string }> = memo(({ id }) => {
 
   useDebounce(() => {
     update(state => {
-      if (!compareRect(rect, state.elements[id].scenes[activeScene].rect)) {
-        state.elements[id].scenes[activeScene].rect = rect;
+      // element or scene can be gone (removed from the scene, scene deleted)
+      const sceneState = state.elements[id]?.scenes[activeScene];
+      if (rect && sceneState && !compareRect(rect, sceneState.rect)) {
+        sceneState.rect = rect;
       }
     });
   }, 100, [rect]);
@@ -46,6 +50,8 @@ export const ElementEditorTransform: FC<{ id: string }> = memo(({ id }) => {
 
   const handleMove = (e: MouseEvent) => {
     selected && setRect(oldRect => {
+      if (!oldRect)
+        return oldRect;
       const rect = {...oldRect};
       if (transformDirection === 'n') {
         rect.y += e.movementY;
@@ -85,6 +91,20 @@ export const ElementEditorTransform: FC<{ id: string }> = memo(({ id }) => {
         rect.x += e.movementX;
         rect.y += e.movementY;
       }
+      // minimum size, only on the axis being resized (the other one is left alone);
+      // the opposite edge stays where it is, so the position does not drift
+      const resizesW = !!transformDirection && /[ew]/.test(transformDirection);
+      const resizesH = !!transformDirection && /[ns]/.test(transformDirection);
+      if (resizesW && rect.w < MIN_SIZE) {
+        if (transformDirection === 'w' || transformDirection === 'nw' || transformDirection === 'sw')
+          rect.x -= MIN_SIZE - rect.w;
+        rect.w = MIN_SIZE;
+      }
+      if (resizesH && rect.h < MIN_SIZE) {
+        if (transformDirection === 'n' || transformDirection === 'nw' || transformDirection === 'ne')
+          rect.y -= MIN_SIZE - rect.h;
+        rect.h = MIN_SIZE;
+      }
       rect.y = Math.round(rect.y);
       rect.h = Math.round(rect.h);
       rect.x = Math.round(rect.x);
@@ -102,7 +122,7 @@ export const ElementEditorTransform: FC<{ id: string }> = memo(({ id }) => {
   useEffect(() => {
     const removeDrag = () => setMouseDown(false);
     window.addEventListener("mouseup", removeDrag);
-    return () => window.removeEventListener("mousemove", removeDrag);
+    return () => window.removeEventListener("mouseup", removeDrag);
   }, []);
 
   const handleDragDown = (direction: TransformDirection) => {

@@ -24,10 +24,16 @@ pub fn path() -> BoxedFilter<(impl Reply,)> {
     let peers = Peers::default();
     let peers = warp::any().map(move || peers.clone());
     let t = warp::path("peer")
+        .and(super::ws_origin_allowed())
         .and(warp::ws())
         .and(peers)
         .and(warp::query::<PeerQueryData>())
-        .map(|ws: Ws, peers, q| ws.on_upgrade(move |socket| peer_handler(socket, peers, q)))
+        .map(|origin_ok: bool, ws: Ws, peers, q| {
+            if !origin_ok {
+                return super::forbidden_origin();
+            }
+            ws.on_upgrade(move |socket| peer_handler(socket, peers, q)).into_response()
+        })
         .boxed();
     t
 }
@@ -39,15 +45,21 @@ pub async fn peer_handler(ws: WebSocket, peers: Peers, query: PeerQueryData) {
     let rx = UnboundedReceiverStream::new(rx);
     tauri::async_runtime::spawn(rx.forward(peer_tx));
 
-    if peers.read().await.contains_key(&query.id) {
-        println!("already registered");
-        return;
+    {
+        // check and insert under one lock, so two clients can't both take the same id
+        let mut p = peers.write().await;
+        if p.contains_key(&query.id) {
+            // the duplicate is closed silently (dropping tx closes its socket)
+            println!("already registered");
+            return;
+        }
+        // the connection may be gone already, nothing else to do then: the loop below ends
+        // and the peer is removed
+        tx.send(Ok(PeerMessageType::OPEN.into())).ok();
+        p.insert(query.id.clone(), tx);
     }
 
-    tx.send(Ok(PeerMessageType::OPEN.into())).unwrap();
-
-    peers.write().await.insert(query.id.clone(), tx);
-
+    // no return or panic between the insert and the cleanup, so the cleanup always runs
     while let Some(result) = peer_rx.next().await {
         let Ok(msg) = result else {
             break;
@@ -66,7 +78,7 @@ enum PeerMessageType {
     ANSWER,
     EXPIRE, // host not found
     HEARTBEAT,
-    #[serde(rename(serialize = "ID_TAKEN", deserialize = "IDTAKEN"))]
+    #[serde(rename = "ID-TAKEN")]
     IDTAKEN,
     ERROR,
 }
@@ -115,11 +127,11 @@ async fn handle_message(peer_id: &String, msg: Message, users: &Peers) {
             dst: peer_id.clone(),
             payload: msg.payload,
         }) else {return};
-        peer_tx.send(Ok(Message::text(msg_str))).unwrap();
+        peer_tx.send(Ok(Message::text(msg_str))).ok(); // the peer may be gone already
     } else if msg.dst != "" && users.contains_key(&msg.dst) {
         msg.src = peer_id.clone();
         let Some(peer_tx) = users.get(&msg.dst) else {return};
         let Ok(msg_str) = serde_json::to_string(&msg) else {return};
-        peer_tx.send(Ok(Message::text(msg_str))).unwrap();
+        peer_tx.send(Ok(Message::text(msg_str))).ok(); // the peer may be gone already
     }
 }

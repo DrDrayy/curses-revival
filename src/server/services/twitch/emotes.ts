@@ -107,18 +107,29 @@ class TwitchEmotesApi {
     if (!id || !apiClient)
       return;
 
-    await apiClient.chat.getChannelEmotes(id).then(resp => this.addTwitchEmotes(resp));
-    await apiClient.chat.getGlobalEmotes().then(resp => this.addTwitchEmotes(resp));
-    await Load_FFZ_CHANNEL(id).then(resp => this.addEmotes(resp));
-    await Load_FFZ_GLOBAL().then(resp => this.addEmotes(resp));
-    await Load_BTTV_CHANNEL(id).then(resp => this.addEmotes(resp));
-    await Load_BTTV_GLOBAL().then(resp => this.addEmotes(resp));
-    await Load_7TV_CHANNEL(id).then(resp => this.addEmotes(resp));
-    await Load_7TV_GLOBAL().then(resp => this.addEmotes(resp));
+    // each provider on its own, one failing must not stop the others
+    const loaders: (() => Promise<void>)[] = [
+      () => apiClient.chat.getChannelEmotes(id).then(resp => this.addTwitchEmotes(resp)),
+      () => apiClient.chat.getGlobalEmotes().then(resp => this.addTwitchEmotes(resp)),
+      () => Load_FFZ_CHANNEL(id).then(resp => this.addEmotes(resp)),
+      () => Load_FFZ_GLOBAL().then(resp => this.addEmotes(resp)),
+      () => Load_BTTV_CHANNEL(id).then(resp => this.addEmotes(resp)),
+      () => Load_BTTV_GLOBAL().then(resp => this.addEmotes(resp)),
+      () => Load_7TV_CHANNEL(id).then(resp => this.addEmotes(resp)),
+      () => Load_7TV_GLOBAL().then(resp => this.addEmotes(resp)),
+    ];
+    for (const load of loaders) {
+      try {
+        await load();
+      } catch (error) {
+        console.error("[Twitch] emote provider failed", error);
+      }
+    }
   }
 
   dispose() {
     this.dictionary = {};
+    this.dictionaryLowerCase = {};
   }
 }
 

@@ -31,16 +31,19 @@ class Service_Sound implements IServiceInterface {
       try {
         const buffer = window.ApiClient.files.getFileBuffer(fileId);
         if (!buffer) return;
+        // copy only this file's bytes: the Uint8Array can be a view into a bigger buffer
         this.#audioFiles[fileId] = await this.audioContext.decodeAudioData(
-          buffer.buffer.slice(0)
+          buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength)
         );
       } catch (error) {
         return;
       }
 
     const gainNode = this.audioContext.createGain();
-    gainNode.gain.value = effects?.volume || 1; // 10 %
-    const conn = gainNode.connect(this.audioContext.destination);
+    // volume 0 is a valid volume (mute): use 1 only if it is not a number
+    const volume = effects?.volume;
+    gainNode.gain.value = typeof volume === "number" && Number.isFinite(volume) ? volume : 1;
+    gainNode.connect(this.audioContext.destination);
 
     const source = this.audioContext.createBufferSource();
     source.buffer = this.#audioFiles[fileId];
@@ -61,7 +64,8 @@ class Service_Sound implements IServiceInterface {
       );
     }
     source.onended = () => {
-      conn.disconnect();
+      source.disconnect();
+      gainNode.disconnect();
     };
     // endregion
 

@@ -168,26 +168,44 @@ class Service_PubSub implements IServiceInterface {
 
 
     this.serviceState.state = ServiceNetworkState.connecting;
-    this.#socket = new WebSocket(`ws://${fullAddress}/pubsub?id=${window.ApiServer.state.id}-${Date.now()}`);
-    const a = setTimeout(() => {
-      this.#socket?.close();
+    // keep a local reference: this.#socket can point to a newer socket by the time the handlers run
+    let socket: WebSocket;
+    try {
+      socket = new WebSocket(`ws://${fullAddress}/pubsub?id=${window.ApiServer.state.id}-${Date.now()}`);
+    } catch (error) {
+      // e.g. port above 65535: the constructor throws, don't stay "connecting" forever
+      this.serviceState.state = ServiceNetworkState.disconnected;
+      toast.error("Invalid link address");
+      return;
+    }
+    this.#socket = socket;
+    const timeout = setTimeout(() => {
+      socket.close();
     }, 5000);
-    this.#socket.onopen = () => {
-      clearTimeout(a);
+    socket.onopen = () => {
+      clearTimeout(timeout);
       this.serviceState.state = ServiceNetworkState.connected;
-      if (!this.#socket)
-        return;
-      this.#socket.onmessage = (msg) => {
+      socket.onmessage = (msg) => {
         return this.consumePubSubMessage(msg.data);
       };
     };
-    this.#socket.onclose = () => {
+    socket.onerror = () => {
+      clearTimeout(timeout);
+    };
+    socket.onclose = () => {
+      clearTimeout(timeout);
+      // a newer connection owns the state now
+      if (this.#socket && this.#socket !== socket)
+        return;
+      this.#socket = undefined;
       this.serviceState.state = ServiceNetworkState.disconnected;
-    }
+    };
   }
   linkDisconnect() {
-    if (this.#socket?.close())
-      this.#socket = undefined;
+    const socket = this.#socket;
+    this.#socket = undefined;
+    socket?.close();
+    this.serviceState.state = ServiceNetworkState.disconnected;
   }
 }
 
