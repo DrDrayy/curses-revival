@@ -139,6 +139,9 @@
   },
 
   "settings": {
+    "section_logs": "Error log",
+    "logs_desc": "Problems are written to a log file on this PC. Tokens and keys are hidden from it.",
+    "btn_open_logs": "Open log folder",
     "title": "Settings",
     "desc_1": "Made with 💖 by Mmp",
     "desc_2": "Join discord for updates and help!",

@@ -135,6 +135,9 @@
   },
 
   "settings": {
+    "section_logs": "錯誤日誌",
+    "logs_desc": "問題會寫入本機的日誌檔案，權杖和金鑰不會被記錄。",
+    "btn_open_logs": "開啟日誌資料夾",
     "title": "設置",
     "desc_1": "本應用由 Mmp 製作",
     "desc_2": "加入 discord 以獲取更新和幫助!",

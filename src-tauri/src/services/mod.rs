@@ -1,3 +1,4 @@
+pub mod log;
 pub mod osc;
 pub mod web;
 pub mod audio;

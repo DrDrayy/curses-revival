@@ -135,6 +135,9 @@
   },
 
   "settings": {
+    "section_logs": "错误日志",
+    "logs_desc": "问题会写入本机的日志文件，令牌和密钥不会被记录。",
+    "btn_open_logs": "打开日志文件夹",
     "title": "设置",
     "desc_1": "本应用由 Mmp 制作",
     "desc_2": "加入 discord 以获取更新和帮助!",
