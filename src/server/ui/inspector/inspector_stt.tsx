@@ -8,7 +8,7 @@ import { useSnapshot } from "valtio";
 import { azureLanguages, deepGramLangs, nativeLangs } from "../../services/stt/stt_data";
 import ServiceButton from "../service-button";
 import Inspector from "./components";
-import { InputCheckbox, InputMapObject, InputMappedGroupSelect, InputSelect, InputText, InputWebAudioInput } from "./components/input";
+import { InputCheckbox, InputMapObject, InputMappedGroupSelect, InputSelect, InputText, InputTextArea, InputWebAudioInput } from "./components/input";
 import NiceModal from "@ebay/nice-modal-react";
 import Modal from "../Modal";
 import { useTranslation } from 'react-i18next';
@@ -144,15 +144,12 @@ const Deepgram: FC = () => {
       library={deepGramLangs} />
 
     <InputSelect options={[
-      { label: 'Base', value: 'base' },
-      { label: 'Enhanced', value: 'enhanced' },
-    ]} label="stt.deepgram_quality" value={pr.tier} onValueChange={e => up("tier", e)} />
-
-    <span className="text-base-content/60 text-xs">
-      {t('stt.deepgram_quality_notice')}
-      <br />
-      <a className="link link-primary link-hover" target="_blank" href="https://developers.deepgram.com/documentation/features/language/#language-options">{t('stt.deepgram_quality_notice_link')}</a>
-    </span>
+      { label: 'Nova-3 (most accurate)', value: 'nova-3' },
+      { label: 'Nova-2 (more languages)', value: 'nova-2' },
+      { label: 'Enhanced (old)', value: 'enhanced' },
+      { label: 'Base (old)', value: 'base' },
+    ]} label="stt.deepgram_model" value={pr.model} onValueChange={e => up("model", e)} />
+    <Inspector.Description>{t('stt.deepgram_model_notice')}</Inspector.Description>
 
     <InputCheckbox label="stt.field_enable_interim_results" onChange={e => up("interim", e)} value={pr.interim} />
     <InputCheckbox label="stt.deepgram_profanity" onChange={e => up("profanity", e)} value={pr.profanity} />
@@ -214,6 +211,10 @@ const Inspector_STT: FC = () => {
       <InputCheckbox label="stt.field_stop_with_stream" value={data.data.stopWithStream} onChange={e => up("stopWithStream", e)} />
       <span className="link link-accent link-hover font-semibold flex items-center gap-2 text-sm" onClick={handleShowReplacements}><RiCharacterRecognitionFill/>{t('common.btn_edit_replacements')}</span>
       <Inspector.Deactivatable active={state.status === ServiceNetworkState.disconnected}>
+        <InputTextArea label="stt.field_custom_words" value={data.data.customWords} onChange={e => up("customWords", e.target.value)} />
+        <Inspector.Description>{t('stt.custom_words_desc')}</Inspector.Description>
+        <InputText type="number" step="1" label="stt.field_sentence_pause" value={data.data.sentencePauseMs} onChange={e => up("sentencePauseMs", e.target.value)} />
+        <Inspector.Description>{t('stt.sentence_pause_desc')}</Inspector.Description>
         <InputSelect options={[
           { label: "Native", value: STT_Backends.native },
           { label: "Browser", value: STT_Backends.browser },

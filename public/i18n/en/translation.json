@@ -60,6 +60,12 @@
     "section_integrations": "Integrations"
   },
   "stt": {
+    "deepgram_model": "Model",
+    "deepgram_model_notice": "If your language doesn't work with Nova-3, pick Nova-2.",
+    "field_custom_words": "Custom words",
+    "custom_words_desc": "One per line: names and words that should be recognised better (Azure and Deepgram).",
+    "field_sentence_pause": "Sentence pause (ms)",
+    "sentence_pause_desc": "How long a pause ends a sentence. Lower = faster captions, higher = fewer split sentences. Empty = default (Azure and Deepgram).",
     "title": "Speech to text",
     "field_enable_interim_results": "Enable interim results",
     "field_uwu_filter": "UwU filter",
@@ -139,6 +145,10 @@
   },
 
   "settings": {
+    "section_hotkeys": "Hotkeys",
+    "hotkey_start": "Start / stop speech to text",
+    "hotkey_mute_mic": "Mute / unmute mic",
+    "hotkey_mute_sound": "Mute / unmute sound effects",
     "section_logs": "Error log",
     "logs_desc": "Problems are written to a log file on this PC. Tokens and keys are hidden from it.",
     "btn_open_logs": "Open log folder",
@@ -219,6 +229,13 @@
     "field_post_only_when_streaming": "Post only when live streaming"
   },
   "vrc": {
+    "field_afk_pause": "Pause chatbox while AFK",
+    "field_osc_listen_port": "VRChat OSC output port",
+    "afk_desc": "Needs OSC turned on in VRChat. Uses the port VRChat sends to (9001 by default); only one app can listen on it.",
+    "status_label": "VRChat:",
+    "status_active": "active",
+    "status_afk": "AFK, chatbox paused",
+    "status_no_data": "no data yet",
     "textbox_notify_sound": "Play chatbox sound",
     "title": "VRChat chatbox",
     "notice_title": "Enable OSC in VRChat first!",

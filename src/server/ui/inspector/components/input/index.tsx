@@ -54,6 +54,24 @@ export const InputBaseText: FC<InputHTMLAttributes<HTMLInputElement> & {fieldWid
 
 interface InputTextProps extends InputBaseProps, InputHTMLAttributes<HTMLInputElement> { }
 
+interface InputTextAreaProps extends InputBaseProps, InputHTMLAttributes<HTMLTextAreaElement> { }
+
+export const InputTextArea: FC<InputTextAreaProps> = memo(({ label, value, onChange, ...rest }) => {
+  const id = useId();
+  const [internalValue, setInternalValue] = useState(value);
+  useEffect(() => {
+    if (value !== internalValue)
+      setInternalValue(value);
+  }, [value]);
+  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setInternalValue(e.target.value);
+    onChange?.(e as any);
+  };
+  return <InputContainer label={label} id={id} vertical>
+    <textarea id={id} rows={4} {...(rest as any)} value={internalValue} onChange={handleChange} className="textarea textarea-bordered w-full text-xs font-semibold leading-snug" />
+  </InputContainer>
+});
+
 const stringToRgba = (value: string): RgbaColor => {
   const val = value?.slice?.(5, -1).split(",");
   return val ? {

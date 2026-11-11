@@ -8,12 +8,13 @@ import {
   AutoDetectSourceLanguageConfig,
   CancellationErrorCode,
   LanguageIdMode,
+  PhraseListGrammar,
   PropertyId,
   SpeechConfig,
   SpeechRecognizer,
 } from "microsoft-cognitiveservices-speech-sdk";
 import { isEmptyValue } from "../../../../utils";
-import { STT_State } from "../schema";
+import { parseCustomWords, parsePauseMs, STT_State } from "../schema";
 
 export class STT_AzureService implements ISTTService {
   constructor(private bindings: ISTTReceiver) {}
@@ -51,6 +52,9 @@ export class STT_AzureService implements ISTTService {
       PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs,
       ((parseInt(state.azure.silenceTimeout) || 20) * 1000).toString()
     );
+    const pause = parsePauseMs(state.sentencePauseMs, 100, 5000);
+    if (pause !== undefined)
+      speechConfig.setProperty(PropertyId.Speech_SegmentationSilenceTimeoutMs, String(pause));
     speechConfig.enableDictation();
 
     const langConfig = AutoDetectSourceLanguageConfig.fromLanguages(state.azure.secondary_language && state.azure.use_secondary_language ? 
@@ -62,6 +66,19 @@ export class STT_AzureService implements ISTTService {
       langConfig,
       audioConfig
     );
+
+    // custom words: at most 200 phrases and 3200 characters in total
+    const words = parseCustomWords(state.customWords, 200);
+    if (words.length) {
+      const grammar = PhraseListGrammar.fromRecognizer(this.#instance);
+      let chars = 0;
+      for (const w of words) {
+        if (chars + w.length > 3200)
+          break;
+        grammar.addPhrase(w);
+        chars += w.length;
+      }
+    }
 
     this.#instance.sessionStarted = () => this.bindings.onStart();
     this.#instance.sessionStopped = () => this.bindings.onStop();

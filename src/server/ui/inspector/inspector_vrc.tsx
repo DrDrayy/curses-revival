@@ -1,4 +1,5 @@
-import { FC } from "react";
+import classNames from "classnames";
+import { FC, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { RiAlertFill, RiMessage2Fill } from "react-icons/ri";
 import { useSnapshot } from "valtio";
@@ -42,6 +43,29 @@ const KillFrenzyInspector: FC = () => {
   </>
 }
 
+// "active" means OSC data in the last 10 s
+const ACTIVE_FOR = 10000;
+
+const AfkStatus: FC = () => {
+  const {t} = useTranslation();
+  const status = useSnapshot(window.ApiServer.vrc.status);
+  // data stopping changes nothing in the state: look at the clock again every second
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const [text, color] = status.error ? [status.error, "text-error"]
+    : status.afk ? [t('vrc.status_afk'), "text-warning"]
+    : now - status.lastSeen < ACTIVE_FOR ? [t('vrc.status_active'), "text-success"]
+    : [t('vrc.status_no_data'), "text-base-content/70"];
+  return <div className="flex gap-1 text-xs font-medium">
+    <span className="text-base-content/80">{t('vrc.status_label')}</span>
+    <span className={classNames("font-semibold", color)}>{text}</span>
+  </div>
+}
+
 const Inspector_VRC: FC = () => {
   const {t} = useTranslation();
   const state: VRC_State = useSnapshot(window.ApiServer.state.services.vrc.data);
@@ -60,6 +84,12 @@ const Inspector_VRC: FC = () => {
       <InputCheckbox label="common.field_enable" value={state.enable} onChange={e => up("enable", e)} />
       <InputTextSource label="common.field_text_source" value={state.source} onChange={e => up("source", e)} />
       <InputCheckbox label="common.field_use_keyboard_input" value={state.inputField} onChange={e => up("inputField", e)} />
+      <InputCheckbox label="vrc.field_afk_pause" value={state.afkPause} onChange={e => up("afkPause", e)} />
+      {state.afkPause && <>
+        <InputText type="number" label="vrc.field_osc_listen_port" min={1} max={65535} value={state.oscListenPort} onChange={e => up("oscListenPort", e.target.value)} />
+        <Inspector.Description>{t('vrc.afk_desc')}</Inspector.Description>
+        <AfkStatus />
+      </>}
 
       <InputSelect options={targetOptions} label="vrc.field_target" value={state.target} onValueChange={e => up("target", e as VRC_Backends)} />
       {state.target === VRC_Backends.killfrenzy && <KillFrenzyInspector />}

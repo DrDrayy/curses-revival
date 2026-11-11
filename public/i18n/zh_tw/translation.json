@@ -60,6 +60,12 @@
     "section_integrations": "集成"
   },
   "stt": {
+    "deepgram_model": "模型",
+    "deepgram_model_notice": "如果你的語言無法使用 Nova-3，請選擇 Nova-2。",
+    "field_custom_words": "自訂詞彙",
+    "custom_words_desc": "每行一個：需要更準確辨識的名字和詞語（Azure 和 Deepgram）。",
+    "field_sentence_pause": "句間停頓（毫秒）",
+    "sentence_pause_desc": "多長的停頓算作一句結束。越低字幕越快，越高句子越少被拆開。留空為預設（Azure 和 Deepgram）。",
     "title": "語音轉文本",
     "field_enable_interim_results": "啟用臨時結果",
     "field_uwu_filter": "生成顏文字",
@@ -135,6 +141,10 @@
   },
 
   "settings": {
+    "section_hotkeys": "快捷鍵",
+    "hotkey_start": "開始 / 停止語音轉文字",
+    "hotkey_mute_mic": "麥克風靜音 / 取消靜音",
+    "hotkey_mute_sound": "音效靜音 / 取消靜音",
     "section_logs": "錯誤日誌",
     "logs_desc": "問題會寫入本機的日誌檔案，權杖和金鑰不會被記錄。",
     "btn_open_logs": "開啟日誌資料夾",
@@ -214,6 +224,13 @@
     "field_post_only_when_streaming": "只在在線時推送"
   },
   "vrc": {
+    "field_afk_pause": "AFK 時暫停聊天框",
+    "field_osc_listen_port": "VRChat OSC 輸出連接埠",
+    "afk_desc": "需要在 VRChat 中開啟 OSC。使用 VRChat 傳送資料的連接埠（預設 9001），同一時間只能有一個程式監聽。",
+    "status_label": "VRChat：",
+    "status_active": "在線",
+    "status_afk": "AFK，聊天框已暫停",
+    "status_no_data": "尚無資料",
     "textbox_notify_sound": "播放聊天框提示音",
     "title": "VRChat chatbox",
     "notice_title": "請先在 VRChat 中啟用 OSC!",

@@ -4,7 +4,31 @@ import {
 } from "../types";
 
 import { isEmptyValue } from "../../../../utils";
-import { STT_State } from "../schema";
+import { parseCustomWords, parsePauseMs, STT_State } from "../schema";
+
+// websocket address for Deepgram live speech-to-text, values are URL-encoded
+export function buildDeepgramUrl(state: Pick<STT_State, "deepgram" | "customWords" | "sentencePauseMs">): string {
+  const dg = state.deepgram;
+  const model = dg.model || "nova-3";
+  const params = new URLSearchParams();
+  params.append("model", model);
+  params.append("language", dg.language);
+  params.append("punctuate", String(!!dg.punctuate));
+  params.append("smart_format", String(!!dg.punctuate));
+  params.append("profanity_filter", String(!!dg.profanity));
+  params.append("interim_results", String(!!dg.interim));
+
+  const pause = parsePauseMs(state.sentencePauseMs, 10, 5000);
+  if (pause !== undefined)
+    params.append("endpointing", String(pause));
+
+  // nova-3 takes "keyterm", older models take "keywords"
+  const wordParam = model.startsWith("nova-3") ? "keyterm" : "keywords";
+  for (const w of parseCustomWords(state.customWords, 50))
+    params.append(wordParam, w);
+
+  return `wss://api.deepgram.com/v1/listen?${params.toString().replace(/\+/g, "%20")}`;
+}
 
 export class STT_DeepgramService implements ISTTService {
   constructor(private bindings: ISTTReceiver) {}
@@ -23,7 +47,9 @@ export class STT_DeepgramService implements ISTTService {
 
   start(state: STT_State): void {
 
-    if (Object.values(state.deepgram).some(isEmptyValue))
+    // "tier" is an old setting that is no longer used
+    const { tier, ...required } = state.deepgram;
+    if (Object.values(required).some(isEmptyValue))
       return this.bindings.onStop("Options missing");
 
     this.stopped = false;
@@ -36,7 +62,7 @@ export class STT_DeepgramService implements ISTTService {
       this.stream = stream;
       this.recorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
       this.socket = new WebSocket(
-        `wss://api.deepgram.com/v1/listen?punctuate=${!!state.deepgram.punctuate}&interim_results=${!!state.deepgram.interim}&language=${state.deepgram.language}&tier=${state.deepgram.tier}&profanity_filter=${!!state.deepgram.profanity}`,
+        buildDeepgramUrl(state),
         ["token", state.deepgram.key]
       );
 

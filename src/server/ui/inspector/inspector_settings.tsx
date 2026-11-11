@@ -146,6 +146,11 @@ const Inspector_Settings: FC = memo(() => {
         </Dropdown>
       </div>
 
+      <Inspector.SubHeader>{t('settings.section_hotkeys')}</Inspector.SubHeader>
+      <InputShortcut label="settings.hotkey_start" shortcut="start" />
+      <InputShortcut label="settings.hotkey_mute_mic" shortcut="muteMic" />
+      <InputShortcut label="settings.hotkey_mute_sound" shortcut="muteSound" />
+
       {window.Config.features.background_input && <>
         <Inspector.SubHeader>Background Input</Inspector.SubHeader>
         <InputShortcut label="Shortcut" shortcut="bgInput" />

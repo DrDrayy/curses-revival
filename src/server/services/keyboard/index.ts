@@ -5,7 +5,7 @@ import hotkeys from "hotkeys-js";
 import uniqBy from "lodash/uniqBy";
 import { toast } from "react-toastify";
 import { proxy }                                             from "valtio";
-import { IServiceInterface, TextEventSource, TextEventType } from "@/types";
+import { IServiceInterface, ServiceNetworkState, TextEventSource, TextEventType } from "@/types";
 import { BackendState }                                      from "../../schema";
 
 type ShortcutKeys = keyof BackendState["shortcuts"];
@@ -34,10 +34,11 @@ class Service_Keyboard implements IServiceInterface {
   });
 
   async init() {
+    // global shortcuts (start, mute) work in every build
+    this.rebindShortcuts();
+
     if (!window.Config.features.background_input)
       return;
-      
-    this.rebindShortcuts();
 
     // send hotkeys
     listen<string>('keyboard', e => {
@@ -75,6 +76,21 @@ class Service_Keyboard implements IServiceInterface {
   private processShortcut(shortcut: ShortcutKeys) {
     if (shortcut === "bgInput") {
       this.startBackgroundInput();
+    }
+    else if (shortcut === "start") {
+      // same as the action bar button
+      const stt = window.ApiServer.stt;
+      const status = stt.serviceState.status;
+      if (status === ServiceNetworkState.connected || status === ServiceNetworkState.connecting)
+        stt.stop();
+      else
+        stt.start();
+    }
+    else if (shortcut === "muteMic") {
+      window.ApiServer.stt.toggleMute();
+    }
+    else if (shortcut === "muteSound") {
+      window.ApiServer.state.muteSoundEffects = !window.ApiServer.state.muteSoundEffects;
     }
   }
 
@@ -135,6 +151,9 @@ class Service_Keyboard implements IServiceInterface {
     const registering: Promise<void>[] = [];
     for (let k in window.ApiServer.state.shortcuts) {
       let key: ShortcutKeys = k as any;
+      // background input shortcut is only usable when the feature is built in
+      if (key === "bgInput" && !window.Config.features.background_input)
+        continue;
       window.ApiServer.state.shortcuts[key] !== "" && registering.push(globalShortcut.register(window.ApiServer.state.shortcuts[key], k => {
         this.processShortcut(key);
       }).catch(err => {
