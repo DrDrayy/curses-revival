@@ -307,7 +307,7 @@
     "section_box_shadow": "Text shadow",
     "box_shadow_position": "Position",
     "box_shadow_blur": "Blur",
-    "box_shadow_spread": "Blur",
+    "box_shadow_spread": "Spread",
     "box_shadow_color": "Color",
 
     "section_box_background": "background",

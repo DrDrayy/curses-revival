@@ -302,7 +302,7 @@
     "section_box_shadow": "文本阴影",
     "box_shadow_position": "位置",
     "box_shadow_blur": "模糊",
-    "box_shadow_spread": "模糊",
+    "box_shadow_spread": "扩展",
     "box_shadow_color": "颜色",
 
     "section_box_background": "背景",

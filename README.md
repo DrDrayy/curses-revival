@@ -1,75 +1,87 @@
-<p align="center">
-<img height="60" src="https://user-images.githubusercontent.com/3977499/218317016-0ebd9936-4065-4b6b-a0a0-1199d43c0024.svg">
-</p>
-<p align="center">
-  <a href="https://GitHub.com/mmpneo/curses/releases/"><img src="https://img.shields.io/github/release/mmpneo/curses.svg?color=FC6471&label" alt="Node.js CI"></a>
-</p>
-<p align="center">Speech to Text Captions for OBS, VRChat, Twitch chat and Discord</p>
+# curses-revival
 
-<p align="center"><b>Socials</b></p>
-<p align="center">
-  <a href="https://www.twitch.tv/mmpcode"><img alt="Twitch Status" src="https://img.shields.io/twitch/status/mmpcode?label=Dev Streams&logo=twitch&logoColor=white"></a>
-  <a href="https://discord.gg/Sw6pw8fGYS"><img src="https://img.shields.io/discord/856500849815060500?label=Join Discord&color=blue&logo=discord&logoColor=white" alt="Discord"></a>
-  <a href="https://twitter.com/mmpneo"><img src="https://img.shields.io/badge/Receive Updates-%231DA1F2.svg?label=Follow&logo=twitter&logoColor=white"></a> 
-</p>
+Speech-to-text captions for VRChat, OBS and Twitch chat. You talk, and your words show up as a chatbox message, a stream overlay and a chat post.
 
-<p align="center">
-<span class="badge-patreon">
-  <a href="https://patreon.com/mmpcode"><img src="https://img.shields.io/badge/patreon-Donate-yellow.svg?label=&logo=patreon&logoColor=white" alt="Patreon donate button" /></a>
-</span>
-</p>
+> **Fork notice.** This is a modified version of [curses by mmpneo](https://github.com/mmpneo/curses). It was modified starting November 2026. It stays licensed under the GNU AGPL-3.0 (see [LICENSE.md](LICENSE.md)). It is not affiliated with or endorsed by the original author.
 
-<p align="center">
-<!-- static -->
-  <!-- <img width="600" src="https://user-images.githubusercontent.com/3977499/218319590-296c96f0-7daa-4130-ab40-6b32f20cc26e.png"> -->
-  <img width="600" src="https://user-images.githubusercontent.com/3977499/218335391-a53dab5b-1e22-47b8-89c5-e1124798fbdc.gif">
-</p>
+This is a **first release**. It has been tested by very few people. Please [report problems](../../issues/new/choose).
 
-<p align="center"><b>Repo Stats</b></p>
-<p align="center">
-  <img alt="GitHub repo size]" src="https://img.shields.io/github/repo-size/mmpneo/curses?color=2EB87D"/>
-  <img alt="GitHub language count" src="https://img.shields.io/github/languages/count/mmpneo/curses?color=2EB87D"/>
-  <img alt="GitHub top language" src="https://img.shields.io/github/languages/top/mmpneo/curses?color=2EB87D"/>
-  <img alt="GitHub last commit]" src="https://img.shields.io/github/last-commit/mmpneo/curses?color=2EB87D"/>
-</p>
+## Two builds
 
-# Features
-- **OBS Captions customization**: Colors, fonts, shadows, background textures, text typing animation, sound effects, particle effects and CSS
-- **Native OBS stream captions**
-- **Google Fonts**: more than 1000 free fonts for OBS captions
-- **Speech to Text**: [Microsoft Azure](https://azure.microsoft.com/en-au/products/cognitive-services/speech-to-text/), [Speechly](https://www.speechly.com/), [Deepgram](https://deepgram.com/), WebSpeechApi(Chrome and Edge)
-- **Text to Speech**: [Microsoft Azure](https://azure.microsoft.com/en-us/products/cognitive-services/text-to-speech/), [Uberduck](https://uberduck.ai/), TikTok, Windows Api (SAPI), WebSpeechApi
-- **VRChat**: [KillFrenzy Avatar text](https://github.com/killfrenzy96/KillFrenzyAvatarText), vrchat's chatbox
-- **Twitch**: 
-  - Use 7TV/FFZ/BTTV emotes in OBS captions
-  - Post your STT to chat 
-  - Use your chat messages as a source for captions and TTS
-  - native captions
-- **Discord**: Send your STT to specified channel
-- **Scenes**:
-  - Save multiple designs and freely switch between them
-  - Automatically switch design when OBS changes scene
+| Build | What it is | Pick it if |
+|---|---|---|
+| **fixes** | The original program plus bug fixes, plus an error log file. | You want the original program, only more stable. |
+| **features** | Everything in fixes, plus new features (see below). | You want the new features. This is the front page of this repository. |
 
-# Community
-For help, feature requests, bug reports, release notifications, design templates [Join Discord](https://discord.gg/Sw6pw8fGYS)
+If you are not sure, take **features**. You can change later, but see [Troubleshooting](docs/troubleshooting.md) first: some features-only settings can be lost when you go back to fixes.
 
-<a href="https://discord.gg/Sw6pw8fGYS"><img src="https://discordapp.com/api/guilds/856500849815060500/widget.png?style=banner2" /></a>
+## Download
 
-# Getting Started with OBS
-### 1. Get the App
-Get the latest [release here](https://github.com/mmpneo/curses/releases/latest). You can also [Join Discord](https://discord.gg/Sw6pw8fGYS) to get release notifications and download the new version from there as soon as it is published
+- **Releases page** (best): [Releases](../../releases). Look for tags like `v0.1.0-fixes` and `v0.1.0-features`. Files are called `curses-revival-<tag>.exe` (the program) and `curses-revival-<tag>.msi` (an installer).
+- **Actions page** (newest, for testers): open the latest successful run on the [Actions](../../actions) page and download the artifact `curses-fixes` or `curses-features`. These downloads expire after a while.
 
-### 2. Open app and copy link for OBS
-Or click "Set Up OBS" to have everything set up automatically with **obs-websocket** plugin
+Windows may show a "SmartScreen" warning because the program is not signed. See [Troubleshooting](docs/troubleshooting.md).
 
-<img width="600" src="https://user-images.githubusercontent.com/3977499/218330675-472e02a9-1e18-4d60-8662-c4ca33325c24.gif">
+## What it does
 
-### 3. Create browser source in OBS
-Paste the link and change window size to match app's canvas size (default is 500x300)
+From the original program:
 
-<img width="600" src="https://user-images.githubusercontent.com/3977499/218331723-721b69c5-a457-4dad-9658-f5232afc68f1.gif">
+- **Speech to text** from your microphone. Services: Native, Browser (Chrome or Edge), Azure and Deepgram.
+- **Captions overlay for OBS.** Colors, fonts, shadows, backgrounds, typing animation, sounds, particles and your own CSS.
+- **OBS native stream captions.**
+- **VRChat.** The chatbox, or the KillFrenzy avatar text.
+- **Twitch.** Emotes (7TV, FFZ, BTTV) in captions, posting your captions in chat, and using chat messages as a text source.
+- **Discord.** Post your speech to a channel.
+- **Text to speech and translation.**
+- **Scenes.** Several designs, with automatic switching when OBS changes scene.
 
-## Roadmap
-- [ ] STT - Vosk
-- [ ] STT - OpenAI Whisper
-- [ ] TTS - VoiceVox
+## What's new in this fork
+
+- **Both builds:** 43 of the 44 bugs found in the original are fixed (the one left is listed under Known issues in the changelog), several security holes are closed, and the app writes an error log. The VRChat "typing..." bubble no longer gets stuck, and long messages are split properly.
+- **Features build only:** a switch for the VRChat chatbox sound, pause the chatbox while you are AFK, Deepgram Nova-3 and Nova-2, custom words, a sentence pause setting, hotkeys, and your own Twitch Client ID typed into the app.
+
+Full list: [CHANGELOG.md](CHANGELOG.md).
+
+## Quick start
+
+1. Download the `.exe` (or install the `.msi`) from [Releases](../../releases) and start it.
+2. Open the **Speech to text** tab. Pick a service and fill in what it asks for (see [Speech to text](docs/speech-to-text.md)). Press **Start**.
+3. For VRChat: turn on OSC in the game, then open the **VRChat chatbox** tab and tick **Enable** (see [VRChat chatbox](docs/vrchat-chatbox.md)).
+4. For OBS: open the **OBS Studio** tab and press **Copy browser source url**. In OBS add a Browser source and paste it (see [OBS overlay](docs/obs-overlay.md)).
+5. For Twitch: open the **Twitch** tab and log in. In the features build, paste your own Twitch Client ID first (see [Twitch](docs/twitch.md)).
+6. Say something. Use **Send test** in the VRChat tab if you want to check the chatbox first.
+7. If something breaks, go to **Settings** and press **Open log folder**.
+
+## Setup guides
+
+- [OBS overlay](docs/obs-overlay.md)
+- [VRChat chatbox](docs/vrchat-chatbox.md)
+- [Twitch](docs/twitch.md)
+- [Speech to text](docs/speech-to-text.md)
+- [Troubleshooting](docs/troubleshooting.md)
+
+## Reporting problems
+
+Please use the [issue form](../../issues/new/choose). Tell us which build and version you use, what you did and what happened.
+
+Attach lines from the log file: open **Settings**, press **Open log folder**, and open `curses.log`. Tokens and keys are hidden in the log, but please look through the lines before you post them, and remove anything private.
+
+## Building from source
+
+You need Windows, Node 20, pnpm 9 and Rust **1.79.0**. Newer Rust versions fail on the locked `time` 0.3.30 package.
+
+```
+pnpm install --frozen-lockfile
+pnpm tauri build
+```
+
+The result is in `src-tauri/target/release/` (the `.exe`, and an `.msi` in `bundle/msi/`). The automatic build is described in `.github/workflows/release.yml`. Pushing a tag like `v0.1.0-features` makes a release.
+
+## Credits
+
+- [curses by mmpneo](https://github.com/mmpneo/curses): the original project and its author. All the hard work is theirs. Their support and community links are in the original repository.
+- Thanks to everyone who tests this fork and reports problems.
+
+## License
+
+GNU Affero General Public License v3.0, the same as the original. See [LICENSE.md](LICENSE.md). If you give this program, or your own modified version, to other people, you must also offer them the source code, under the same license.

@@ -1,0 +1,72 @@
+name: Bug report
+description: Something does not work as it should
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. This is a first release, so every report helps.
+  - type: dropdown
+    id: build
+    attributes:
+      label: Which build?
+      options:
+        - fixes
+        - features
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or tag
+      description: For example v0.1.0-features. Or write the Actions run if you used one.
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: Windows 11
+    validations:
+      required: true
+  - type: dropdown
+    id: stt
+    attributes:
+      label: Speech-to-text service
+      options:
+        - Native
+        - Browser (Chrome or Edge)
+        - Azure
+        - Deepgram
+        - Not related / none
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+  - type: textarea
+    id: log
+    attributes:
+      label: Log lines
+      description: In curses open Settings, press Open log folder, open curses.log, and paste the lines from around the time of the problem.
+      render: text
+  - type: markdown
+    attributes:
+      value: |
+        Tokens and keys are hidden in the log, but please read the lines again and remove anything private before you submit.
