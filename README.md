@@ -1,6 +1,8 @@
 # curses-revival
 
-Speech-to-text captions for VRChat, OBS and Twitch chat. You talk, and your words show up as a chatbox message, a stream overlay and a chat post.
+Speech-to-text captions for VRChat, OBS and Twitch chat. You talk, and your words show up as a chatbox message, a stream overlay and a chat post. Made for streamers who play in VR with their VRChat mic muted.
+
+**[Download the latest release](../../releases/latest)** · Windows 10 and 11 · [What's new](CHANGELOG.md) · [Setup guides](#setup-guides)
 
 > **Fork notice.** This is a modified version of [curses by mmpneo](https://github.com/mmpneo/curses). It was modified starting November 2026. It stays licensed under the GNU AGPL-3.0 (see [LICENSE.md](LICENSE.md)). It is not affiliated with or endorsed by the original author.
 
@@ -11,13 +13,13 @@ This is a **first release**. It has been tested by very few people. Please [repo
 | Build | What it is | Pick it if |
 |---|---|---|
 | **fixes** | The original program plus bug fixes, plus an error log file. | You want the original program, only more stable. |
-| **features** | Everything in fixes, plus new features (see below). | You want the new features. This is the front page of this repository. |
+| **features** | Everything in fixes, plus new features (see below). | You want the new features. |
 
 If you are not sure, take **features**. You can change later, but see [Troubleshooting](docs/troubleshooting.md) first: some features-only settings can be lost when you go back to fixes.
 
 ## Download
 
-- **Releases page** (best): [Releases](../../releases). Look for tags like `v0.1.0-fixes` and `v0.1.0-features`. Files are called `curses-revival-<tag>.exe` (the program) and `curses-revival-<tag>.msi` (an installer).
+- **Releases page** (best): [Releases](../../releases). Each version has two releases, for example `v0.1.1-features` and `v0.1.1-fixes`. Files are called `curses-revival-<tag>.exe` (the program) and `curses-revival-<tag>.msi` (an installer).
 - **Actions page** (newest, for testers): open the latest successful run on the [Actions](../../actions) page and download the artifact `curses-fixes` or `curses-features`. These downloads expire after a while.
 
 Windows may show a "SmartScreen" warning because the program is not signed. See [Troubleshooting](docs/troubleshooting.md).

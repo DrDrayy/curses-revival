@@ -62,6 +62,15 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: curses-revival ${{ github.ref_name }}
-          body: See CHANGELOG.md for what changed in this version. Builds ending in -fixes contain bug fixes only; builds ending in -features contain the new features too.
+          # the features build is the one most people want: only it gets the "Latest" label
+          make_latest: ${{ endsWith(github.ref_name, '-features') }}
+          body: |
+            **Which file?** `.exe` runs the program directly, `.msi` installs it. Windows 10 and 11.
+
+            **Which build?** Releases ending in `-features` have all new features. Releases ending in `-fixes` are the original program with bug fixes only. Not sure? Take `-features`.
+
+            **What changed:** see [CHANGELOG.md](../../blob/features/CHANGELOG.md) and the [setup guides](../../tree/features/docs).
+
+            **Windows warning:** the program is not signed, so Windows SmartScreen may say "Windows protected your PC". Press **More info**, then **Run anyway**, if you downloaded it from this page.
           fail_on_unmatched_files: true
           files: release-files/*

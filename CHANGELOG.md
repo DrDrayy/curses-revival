@@ -2,6 +2,23 @@
 
 All notable changes to this fork of [curses by mmpneo](https://github.com/mmpneo/curses). Based on the original at its last commit (June 2024). Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.1.1] - 2026-11-12
+
+### Changed
+- The app now shows its real version (0.1.1) in Settings.
+- The `-features` release is marked as the latest release, and release notes say which file and build to pick.
+- In Settings, the original author's links are labelled as theirs, and no longer point users there for help with this version.
+- The README starts with the download link and who the program is for.
+
+### Fixed
+- The "Open an issue" link in the troubleshooting guide.
+
+### Added
+- A feature request form and a security policy (SECURITY.md).
+
+### Removed
+- Leftover sample test files from the original project.
+
 ## [0.1.0] - 2026-11-11
 
 First release. Two builds: **fixes** and **features** (features contains everything in fixes).

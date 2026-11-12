@@ -113,7 +113,7 @@ const Inspector_Settings: FC = memo(() => {
           <Tooltip content="@mmpneo" body="I tweet once a year, LUL">
             <a target="_blank" href="https://twitter.com/mmpneo" className="btn text-primary btn-ghost btn-circle text-2xl"><SiTwitter /></a>
           </Tooltip>
-          <Tooltip content="Code and Curses" body={<span>App updates and help</span>}>
+          <Tooltip content="Code and Curses" body={<span>The original author's Discord</span>}>
             <a target="_blank" href="https://discord.gg/Sw6pw8fGYS" className="btn text-primary btn-ghost btn-circle text-2xl"><SiDiscord /></a>
           </Tooltip>
           <Tooltip content="Patreon" body={<span>Subscribe to get a Supporter role in discord <br/> (completely useless, just different color) <img className="h-8" src="/peepoSmile.webp"/></span>}>

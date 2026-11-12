@@ -1,0 +1,35 @@
+name: Feature request
+description: An idea that would make curses-revival better
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea. Please check the [CHANGELOG](../blob/features/CHANGELOG.md) first, it may already be there.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What would it help with?
+      description: What are you trying to do, and what gets in the way today?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+      description: How should it work?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part?
+      options:
+        - Speech to text
+        - VRChat chatbox
+        - OBS overlay or captions
+        - Twitch
+        - Text to speech or translation
+        - Other
+    validations:
+      required: true
