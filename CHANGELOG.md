@@ -7,14 +7,15 @@ All notable changes to this fork of [curses by mmpneo](https://github.com/mmpneo
 ### Changed
 - The app now shows its real version (0.1.1) in Settings.
 - The `-features` release is marked as the latest release, and release notes say which file and build to pick.
-- In Settings, the original author's links are labelled as theirs. For help with this version, ask whoever gave it to you.
+- In Settings, the original author's links are labelled as theirs. For help with this version, see where you downloaded it.
 - The README starts with the download link and who the program is for.
 
 ### Fixed
 - The "Open an issue" link in the troubleshooting guide.
 
 ### Added
-- A feature request form and a security policy (SECURITY.md).
+- A feature request form, a security policy (SECURITY.md), a contributing guide (CONTRIBUTING.md) and a code of conduct.
+- A "how it works" picture in the README, and a social preview picture (`docs/images/social-preview.png`).
 
 ### Removed
 - Leftover sample test files from the original project.

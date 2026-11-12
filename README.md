@@ -4,6 +4,8 @@ Speech-to-text captions for VRChat, OBS and Twitch chat. You talk, and your word
 
 **[Download the latest release](../../releases/latest)** · Windows 10 and 11 · [What's new](CHANGELOG.md) · [Setup guides](#setup-guides)
 
+![How it works: you speak, curses-revival turns it into text, and the text goes to the VRChat chatbox, an OBS overlay and Twitch chat](docs/images/how-it-works.svg)
+
 > **Fork notice.** This is a modified version of [curses by mmpneo](https://github.com/mmpneo/curses). It was modified starting November 2026. It stays licensed under the GNU AGPL-3.0 (see [LICENSE.md](LICENSE.md)). It is not affiliated with or endorsed by the original author.
 
 This is a **first release**. It has been tested by very few people. Please [report problems](../../issues/new/choose).
@@ -67,6 +69,10 @@ Full list: [CHANGELOG.md](CHANGELOG.md).
 Please use the [issue form](../../issues/new/choose). Tell us which build and version you use, what you did and what happened.
 
 Attach lines from the log file: open **Settings**, press **Open log folder**, and open `curses.log`. Tokens and keys are hidden in the log, but please look through the lines before you post them, and remove anything private.
+
+## Contributing
+
+Bug fixes and ideas are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) and the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## Building from source
 
