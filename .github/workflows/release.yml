@@ -69,7 +69,7 @@ jobs:
 
             **Which build?** Releases ending in `-features` have all new features. Releases ending in `-fixes` are the original program with bug fixes only. Not sure? Take `-features`.
 
-            **What changed:** see [CHANGELOG.md](../../blob/features/CHANGELOG.md) and the [setup guides](../../tree/features/docs).
+            **What changed:** see [CHANGELOG.md](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md) and the [setup guides](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }}/docs).
 
             **Windows warning:** the program is not signed, so Windows SmartScreen may say "Windows protected your PC". Press **More info**, then **Run anyway**, if you downloaded it from this page.
           fail_on_unmatched_files: true
