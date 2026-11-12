@@ -50,4 +50,4 @@ If a settings file cannot be read, the app keeps a copy named like `settings.<nu
 
 ## Still stuck
 
-[Open an issue](../../issues/new/choose) and attach lines from `curses.log`.
+[Open an issue](../../../issues/new/choose) and attach lines from `curses.log`.
