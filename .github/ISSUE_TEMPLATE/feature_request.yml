@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for the idea. Please check the [CHANGELOG](../blob/features/CHANGELOG.md) first, it may already be there.
+        Thanks for the idea. Please check CHANGELOG.md in this repository first, it may already be there.
   - type: textarea
     id: problem
     attributes:

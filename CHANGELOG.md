@@ -7,7 +7,7 @@ All notable changes to this fork of [curses by mmpneo](https://github.com/mmpneo
 ### Changed
 - The app now shows its real version (0.1.1) in Settings.
 - The `-features` release is marked as the latest release, and release notes say which file and build to pick.
-- In Settings, the original author's links are labelled as theirs, and no longer point users there for help with this version.
+- In Settings, the original author's links are labelled as theirs. For help with this version, ask whoever gave it to you.
 - The README starts with the download link and who the program is for.
 
 ### Fixed
