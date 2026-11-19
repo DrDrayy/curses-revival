@@ -679,6 +679,8 @@
             if (gotFinal && !interim_transcript && sessionStarted && !rollingOver
               && performance.now() - sessionStartedAt >= ROLLOVER_AFTER) {
               rollingOver = true;
+              // the next session starts when "end" comes (3 s at most)
+              restart(0);
               instance.abort();
             }
           } catch (error) { }

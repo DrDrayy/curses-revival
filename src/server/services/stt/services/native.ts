@@ -91,14 +91,12 @@ export class STT_NativeService implements ISTTService {
   };
 
   // only called at a pause (a final result and no live text), so no words are waiting:
-  // abort() ends the session at once, then "end" starts the next one
+  // abort() ends the session at once and the next one starts when "end" comes (3 s at most)
   #rollover() {
     if (this.#rollingOver)
       return;
     this.#rollingOver = true;
-    try {
-      this.#instance?.abort();
-    } catch {}
+    this.#retryAfter(0);
   }
 
   // the session ended without its final result: keep the words heard so far
