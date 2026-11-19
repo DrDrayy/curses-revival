@@ -573,46 +573,95 @@
             startSTT(); // stop
           setStatus(message);
         };
-        // this session got "start"
+        // this session got "start", when, and whether it has sent any result
         let sessionStarted = false;
+        let sessionStartedAt = 0;
+        let sessionHadResult = false;
+        // live text not yet followed by a final result
+        let pendingInterim = '';
+        // Edge's online service ends every session after about 46-50 s with "network"; start a new
+        // session at the next pause after this long, so the cut never lands in the middle of a sentence
+        const ROLLOVER_AFTER = 35000;
+        let rollingOver = false;
         // errors in a row since the last result, and "network" before "start" in a row
         let errorRun = 0;
         let refusedRun = 0;
         let retryTimer;
+        // start() was called and "end" has not come yet (a new start() now would throw)
+        let running = true;
+        let beginWhenEnded = false;
+        const begin = () => {
+          clearTimeout(retryTimer);
+          retryTimer = undefined;
+          if (sttInstance !== instance)
+            return;
+          // the old session has not ended yet: start when it does, or after a safety wait if "end" never comes
+          if (running) {
+            beginWhenEnded = true;
+            retryTimer = setTimeout(() => { running = false; begin(); }, 3000);
+            return;
+          }
+          beginWhenEnded = false;
+          sessionStarted = false;
+          sessionHadResult = false;
+          pendingInterim = '';
+          rollingOver = false;
+          try {
+            instance.start();
+            running = true;
+          } catch (error) {
+            // still running after all: try again shortly
+            if (error && error.name === "InvalidStateError") {
+              running = true;
+              beginWhenEnded = true;
+              retryTimer = setTimeout(() => { running = false; begin(); }, 1000);
+              return;
+            }
+            stopWithMessage(`Listening stopped: ${error && error.message || error}. Press Start again.`);
+          }
+        };
         const restart = (delay) => {
           clearTimeout(retryTimer);
-          retryTimer = setTimeout(() => {
-            retryTimer = undefined;
-            if (sttInstance !== instance)
-              return;
-            sessionStarted = false;
-            try {
-              instance.start();
-            } catch (error) {
-              stopWithMessage(`Listening stopped: ${error && error.message || error}. Press Start again.`);
-            }
-          }, delay);
+          retryTimer = setTimeout(begin, delay);
+        };
+        // the session ended without its final result: keep the words heard so far
+        const flushInterim = () => {
+          const text = pendingInterim;
+          pendingInterim = '';
+          if (/[^\uFFFD\s]/.test(text || "")) {
+            send({topic: "text.stt",data: {type: 0, value: text}});
+            addRowNode(text, 'stt.final');
+          }
         };
 
         sttInstance.onstart = () => {
           sessionStarted = true;
+          sessionStartedAt = performance.now();
           refusedRun = 0;
           buttonStart.textContent = "Listening..."
         }
 
         // keep alive: a normal end (silence) starts again at once, one that never started waits a second
         sttInstance.onend = () => {
-          if (sttInstance !== instance || retryTimer !== undefined)
+          running = false;
+          if (sttInstance !== instance)
+            return;
+          if (beginWhenEnded)
+            return begin();
+          if (retryTimer !== undefined)
             return;
           restart(sessionStarted ? 0 : 1000);
         };
 
         sttInstance.onresult = (event) => {
           errorRun = 0;
+          sessionHadResult = true;
           try {
             let interim_transcript = '';
+            let gotFinal = false;
             for (let i = event.resultIndex; i < event.results.length; ++i) {
               if (event.results[i].isFinal) {
+                gotFinal = true;
                 // each final result once; "\uFFFD" alone (or nothing) is junk (offline mode sends it on stop)
                 const final_transcript = event.results[i][0].transcript;
                 if (!/[^\uFFFD\s]/.test(final_transcript || ""))
@@ -625,12 +674,19 @@
                 sendInterimThrottle({topic: "text.stt",data: {type: 1, value: interim_transcript}})
               }
             }
+            pendingInterim = interim_transcript;
+            // a pause after a long session: no words are waiting, so end it now and start a new one
+            if (gotFinal && !interim_transcript && sessionStarted && !rollingOver
+              && performance.now() - sessionStartedAt >= ROLLOVER_AFTER) {
+              rollingOver = true;
+              instance.abort();
+            }
           } catch (error) { }
         }
         sttInstance.onerror = (e) => {
           console.log(e);
-          // silence, or our own stop
-          if (sttInstance !== instance || e.error === "no-speech" || e.error === "aborted")
+          // silence, or our own stop / new session at a pause
+          if (sttInstance !== instance || e.error === "no-speech" || e.error === "aborted" || rollingOver)
             return;
           // the offline engine refused after all: use the online service from the next start on
           if (instance.processLocally) {
@@ -643,6 +699,18 @@
           // refused twice in a row before it started: the speech service's daily limit, retrying can't help
           else if (e.error === "network" && !sessionStarted && ++refusedRun >= 2)
             return stopWithMessage("The speech service refused to start. Most likely its free daily limit is used up (in Edge about 10 hours of speech a day). Try again later, or use the other browser.");
+          else if (e.error === "network") {
+            // the words heard so far would be lost with this session
+            flushInterim();
+            // a session that was already answering got cut (Edge's regular cut after ~46 s): start again at once
+            if (sessionStarted && sessionHadResult) {
+              restart(0);
+              try {
+                instance.abort();
+              } catch (error) { }
+              return;
+            }
+          }
           // its "end" may never come: end it now and start again after a wait
           errorRun++;
           restart(Math.min(1000 * 2 ** (errorRun - 1), 10000));
