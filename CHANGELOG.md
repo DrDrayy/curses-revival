@@ -7,6 +7,11 @@ All notable changes to this fork of [curses by mmpneo](https://github.com/mmpneo
 ### Fixed (both builds)
 - Native speech-to-text no longer stops at the first "network" error from Microsoft's speech service. It tries again (after 1, 2, 4, 8 and 10 seconds) and only stops after six failures in a row, with a message that suggests Browser with Chrome, Deepgram or Azure.
 
+### Added (features build)
+- **Google (free, via Chrome)**, the old Browser service: pick the language in curses and press **Start in Chrome**. A small Chrome window opens and starts listening by itself.
+- **Offline mode** for it: with **Offline (on this PC, Chrome 139 or newer)** ticked, Chrome recognises speech on your own PC (no "network" errors). It uses Google's online service by itself when offline is not available.
+- Native is called **Microsoft (free, not reliable)** in the features build.
+
 ### Changed (both builds)
 - Native is now called "Native (not reliable)" in the service list.
 - The troubleshooting and speech-to-text guides explain the Native "network" error.
