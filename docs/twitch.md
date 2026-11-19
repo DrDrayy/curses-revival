@@ -2,7 +2,7 @@
 
 Use Twitch for emotes in your captions, for posting your captions in your chat, and for reading chat messages.
 
-## Log in (features build)
+## Log in (beta build)
 
 Each user makes their own free Twitch app. This takes a few minutes and is done once.
 
@@ -17,7 +17,7 @@ The Login button stays grey until you enter a Client ID. You do not need to shar
 
 ## Log in (fixes build)
 
-The fixes build has no box for the Client ID. Login only works if the build was made with a Client ID built in. The downloads from this repository may not have one. If **Login** does nothing, use the features build.
+The fixes build has no box for the Client ID. Login only works if the build was made with a Client ID built in. The downloads from this repository may not have one. If **Login** does nothing, use the beta build.
 
 ## Post your captions in chat
 

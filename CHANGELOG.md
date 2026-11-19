@@ -4,6 +4,12 @@ All notable changes to this fork of [curses by mmpneo](https://github.com/mmpneo
 
 ## [Unreleased]
 
+### Changed
+- The features build is now called the **beta build**: its releases end in `-beta` (before: `-features`). The fixes build is now the default download ("Latest").
+
+### Added (beta build)
+- **Live text while speaking** for the VRChat chatbox: the chatbox fills in as you talk, about every 1.5 seconds, and the finished sentence replaces it. Off by default.
+
 ### Fixed (both builds)
 - **Native** no longer fails with "network" on the first start after installing, or on every start when your PC blocks `config.edge.skype.com` (ad blockers, Pi-hole). The app's browser now uses the Microsoft speech server that accepts apps; the newer one always refused it.
 - **Native** explains when Microsoft's free daily limit (about 10 hours of speech a day) is used up, instead of retrying for nothing.

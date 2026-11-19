@@ -6,14 +6,14 @@ Open the **Speech to text** tab. Pick a **Service**, fill in what it asks for, a
 
 | Service | Needs | Notes |
 |---|---|---|
-| **Native (not reliable)**, called **Microsoft (free, not reliable)** in the features build | Nothing | Sends your voice to Microsoft's online speech service through the app's built-in browser. That service often fails with a "network" error. curses retries for about 25 seconds, then stops with a message (see [Troubleshooting](troubleshooting.md)). If it keeps happening, use **Browser** / **Chrome or Edge**. |
-| **Browser**, called **Chrome or Edge (free)** in the features build | Chrome (or Edge) | Fixes build: press **Open Chrome** or **Open Edge**, and a page opens that listens to your mic. Features build: pick a language and press **Start in Chrome** or **Start in Edge**. A small window opens and starts listening by itself (see below). Keep the window open while you stream. Chrome is the more reliable choice: Edge uses the same Microsoft service as Native. |
+| **Native (not reliable)**, called **Microsoft (free, not reliable)** in the beta build | Nothing | Sends your voice to Microsoft's online speech service through the app's built-in browser. That service often fails with a "network" error. curses retries for about 25 seconds, then stops with a message (see [Troubleshooting](troubleshooting.md)). If it keeps happening, use **Browser** / **Chrome or Edge**. |
+| **Browser**, called **Chrome or Edge (free)** in the beta build | Chrome (or Edge) | Fixes build: press **Open Chrome** or **Open Edge**, and a page opens that listens to your mic. Beta build: pick a language and press **Start in Chrome** or **Start in Edge**. A small window opens and starts listening by itself (see below). Keep the window open while you stream. Chrome is the more reliable choice: Edge uses the same Microsoft service as Native. |
 | **Azure** | An Azure Speech key | Fill in **Key** and **Location**, pick a language. |
 | **Deepgram** | A Deepgram API key | Fill in **Key**, pick a language and a model. |
 
 Speechly used to be in the list. It was discontinued and is removed.
 
-## Chrome or Edge (free): one click and offline mode (features build)
+## Chrome or Edge (free): one click and offline mode (beta build)
 
 1. Pick **Chrome or Edge (free)** as the service and choose your language.
 2. Optional: tick **Offline (on this PC, Chrome 139 or newer)**. Chrome then recognises your speech on your own PC, with no trip to the internet, so no "network" errors.
@@ -34,7 +34,7 @@ Azure and Deepgram are online services. You make an account on their website and
 - **Start automatically** and **Stop with twitch stream**.
 - **Azure**: you do not need a secondary language unless **Enable secondary language** is on.
 
-## Features build only
+## Beta build only
 
 These appear in the **Speech to text** tab.
 

@@ -40,14 +40,14 @@ jobs:
       - name: upload
         uses: actions/upload-artifact@v4
         with:
-          # one download per branch: curses-fixes, curses-features
-          name: curses-${{ github.ref_name }}
+          # one download per branch: curses-fixes, curses-beta (the features branch holds the beta build)
+          name: curses-${{ github.ref_name == 'features' && 'beta' || github.ref_name }}
           if-no-files-found: error
           path: |
             src-tauri/target/release/curses.exe
             src-tauri/target/release/bundle/msi/*.msi
 
-      # pushing a tag like v0.1.0-fixes or v0.1.0-features also publishes a Release (Releases page),
+      # pushing a tag like v0.1.4-fixes or v0.1.4-beta also publishes a Release (Releases page),
       # which does not expire like the Actions downloads above
       - name: name the release files
         if: startsWith(github.ref, 'refs/tags/')
@@ -62,12 +62,12 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: curses-revival ${{ github.ref_name }}
-          # the features build is the one most people want: only it gets the "Latest" label
-          make_latest: ${{ endsWith(github.ref_name, '-features') }}
+          # the steady fixes build is the default download: only it gets the "Latest" label
+          make_latest: ${{ endsWith(github.ref_name, '-fixes') }}
           body: |
             **Which file?** `.exe` runs the program directly, `.msi` installs it. Windows 10 and 11.
 
-            **Which build?** Releases ending in `-features` have all new features. Releases ending in `-fixes` are the original program with bug fixes only. Not sure? Take `-features`.
+            **Which build?** Releases ending in `-fixes` are the original program with bug fixes only: the steady choice. Releases ending in `-beta` get new features first and may have more bugs (up to 0.1.3 they ended in `-features`). Not sure? Take `-fixes`, or `-beta` if you need one of its features, such as Twitch login with your own Client ID.
 
             **What changed:** see [CHANGELOG.md](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md) and the [setup guides](${{ github.server_url }}/${{ github.repository }}/tree/${{ github.ref_name }}/docs).
 

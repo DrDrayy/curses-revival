@@ -15,14 +15,14 @@ This is a **first release**. It has been tested by very few people. Please [repo
 | Build | What it is | Pick it if |
 |---|---|---|
 | **fixes** | The original program plus bug fixes, plus an error log file. | You want the original program, only more stable. |
-| **features** | Everything in fixes, plus new features (see below). | You want the new features. |
+| **beta** | Everything in fixes, plus new features first (see below). May have more bugs. | You want the new features early. |
 
-If you are not sure, take **features**. You can change later, but see [Troubleshooting](docs/troubleshooting.md) first: some features-only settings can be lost when you go back to fixes.
+If you are not sure, take **fixes**. Take **beta** if you need one of its features, for example Twitch login with your own Client ID. You can change later, but see [Troubleshooting](docs/troubleshooting.md) first: some beta-only settings can be lost when you go back to fixes.
 
 ## Download
 
-- **Releases page** (best): [Releases](../../releases). Each version has two releases, for example `v0.1.1-features` and `v0.1.1-fixes`. Files are called `curses-revival-<tag>.exe` (the program) and `curses-revival-<tag>.msi` (an installer).
-- **Actions page** (newest, for testers): open the latest successful run on the [Actions](../../actions) page and download the artifact `curses-fixes` or `curses-features`. These downloads expire after a while.
+- **Releases page** (best): [Releases](../../releases). Each version has two releases, for example `v0.1.4-beta` and `v0.1.4-fixes` (up to 0.1.3 the beta build was called `-features`). Files are called `curses-revival-<tag>.exe` (the program) and `curses-revival-<tag>.msi` (an installer).
+- **Actions page** (newest, for testers): open the latest successful run on the [Actions](../../actions) page and download the artifact `curses-fixes` or `curses-beta`. These downloads expire after a while.
 
 Windows may show a "SmartScreen" warning because the program is not signed. See [Troubleshooting](docs/troubleshooting.md).
 
@@ -42,7 +42,7 @@ From the original program:
 ## What's new in this fork
 
 - **Both builds:** 43 of the 44 bugs found in the original are fixed (the one left is listed under Known issues in the changelog), several security holes are closed, and the app writes an error log. The VRChat "typing..." bubble no longer gets stuck, and long messages are split properly.
-- **Features build only:** a switch for the VRChat chatbox sound, pause the chatbox while you are AFK, Deepgram Nova-3 and Nova-2, custom words, a sentence pause setting, hotkeys, and your own Twitch Client ID typed into the app.
+- **Beta build only:** a switch for the VRChat chatbox sound, pause the chatbox while you are AFK, Deepgram Nova-3 and Nova-2, custom words, a sentence pause setting, hotkeys, and your own Twitch Client ID typed into the app.
 
 Full list: [CHANGELOG.md](CHANGELOG.md).
 
@@ -52,7 +52,7 @@ Full list: [CHANGELOG.md](CHANGELOG.md).
 2. Open the **Speech to text** tab. Pick a service and fill in what it asks for (see [Speech to text](docs/speech-to-text.md)). Press **Start**.
 3. For VRChat: turn on OSC in the game, then open the **VRChat chatbox** tab and tick **Enable** (see [VRChat chatbox](docs/vrchat-chatbox.md)).
 4. For OBS: open the **OBS Studio** tab and press **Copy browser source url**. In OBS add a Browser source and paste it (see [OBS overlay](docs/obs-overlay.md)).
-5. For Twitch: open the **Twitch** tab and log in. In the features build, paste your own Twitch Client ID first (see [Twitch](docs/twitch.md)).
+5. For Twitch: open the **Twitch** tab and log in. In the beta build, paste your own Twitch Client ID first (see [Twitch](docs/twitch.md)).
 6. Say something. Use **Send test** in the VRChat tab if you want to check the chatbox first.
 7. If something breaks, go to **Settings** and press **Open log folder**.
 
@@ -83,7 +83,7 @@ pnpm install --frozen-lockfile
 pnpm tauri build
 ```
 
-The result is in `src-tauri/target/release/` (the `.exe`, and an `.msi` in `bundle/msi/`). The automatic build is described in `.github/workflows/release.yml`. Pushing a tag like `v0.1.0-features` makes a release.
+The result is in `src-tauri/target/release/` (the `.exe`, and an `.msi` in `bundle/msi/`). The automatic build is described in `.github/workflows/release.yml`. Pushing a tag like `v0.1.4-beta` or `v0.1.4-fixes` makes a release.
 
 ## Credits
 

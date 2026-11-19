@@ -27,9 +27,9 @@ Open the **OBS Studio** tab, find **Native stream captions** and tick **Enable**
 
 - Is OSC enabled? **Action Menu > Options > OSC > Enabled**.
 - In the **VRChat chatbox** tab, is **Enable** ticked? Does **Send test** work?
-- Features build: if **Pause chatbox while AFK** is on and you are AFK, nothing is sent on purpose.
+- Beta build: if **Pause chatbox while AFK** is on and you are AFK, nothing is sent on purpose.
 
-## Port 9001 is busy (features build)
+## Port 9001 is busy (beta build)
 
 Only one app can listen on port 9001, VRChat's default OSC output port. Another OSC app may have it. Close that app, then untick and tick **Pause chatbox while AFK** again. Or turn the option off.
 
@@ -40,7 +40,7 @@ Only one app can listen on port 9001, VRChat's default OSC output port. Another 
 - curses now tells the app's browser to use the Microsoft speech server that accepts apps. Before, the first start after installing (and every start, if your PC blocks `config.edge.skype.com`, as many ad blockers and Pi-hole lists do) went to a newer server that always refuses the app.
 - curses rides out short drops by itself: it retries for about 25 seconds before it stops and shows the message.
 - **"Most likely its free daily limit is used up"**: Microsoft allows about 10 hours of speech a day for each app, silence included. It comes back within 24 hours. curses cannot change this; use another service until then.
-- Switch **Service** to **Browser** and press **Open Chrome** (features build: **Google (free, via Chrome)**, pick a language, press **Start in Chrome**). Chrome uses Google's speech service, which is usually reliable, and the features build can run it offline on your PC. Keep the Chrome window open while you stream.
+- Switch **Service** to **Browser** and press **Open Chrome** (beta build: **Chrome or Edge (free)**, pick a language, press **Start in Chrome**). Chrome uses Google's speech service, which is usually reliable, and the beta build can run it offline on your PC. Keep the Chrome window open while you stream.
 - **Open Edge** uses the same Microsoft service as Native, so it can fail the same way.
 - For the most reliable results, use **Deepgram** or **Azure**. Both need a free account and a key, give some free use to start with, and then charge (see [Speech to text](speech-to-text.md)).
 - If Chrome fails too, check whether a firewall, VPN or antivirus blocks the browser.
@@ -60,12 +60,12 @@ Not every language works with Nova-3. In the **Speech to text** tab, change **Mo
 
 ## Twitch Login does nothing
 
-- Features build: enter your **Twitch Client ID** first. See [Twitch](twitch.md). The redirect URL in your Twitch app must be exactly `http://localhost:3030/oauth_twitch.html`.
-- Fixes build: login only works if the build had a Client ID built in. Use the features build.
+- Beta build: enter your **Twitch Client ID** first. See [Twitch](twitch.md). The redirect URL in your Twitch app must be exactly `http://localhost:3030/oauth_twitch.html`.
+- Fixes build: login only works if the build had a Client ID built in. Use the beta build.
 
 ## Settings are gone after switching builds
 
-Going from the features build to the fixes build can drop the settings that only exist in features (like custom words or the Twitch Client ID). Write them down before you switch. Going from fixes to features keeps your settings.
+Going from the beta build to the fixes build can drop the settings that only exist in beta (like custom words or the Twitch Client ID). Write them down before you switch. Going from fixes to features keeps your settings.
 
 If a settings file cannot be read, the app keeps a copy named like `settings.<number>.bak` in its data folder.
 
