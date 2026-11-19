@@ -86,6 +86,9 @@
     "native_title": "Native",
     "native_give_up": "Microsoft's speech service is not answering (network error). Try Chrome or Edge (free), Deepgram or Azure.",
     "native_daily_limit": "Microsoft's speech service refused to start. Most likely its free daily limit (about 10 hours of speech) is used up. It comes back within 24 hours. Until then, use Chrome or Edge (free), Deepgram or Azure.",
+    "native_limit_used": "Microsoft's free limit: {{used}} of about 10 hours of speech used today (updated after each session).",
+    "native_limit_reset": "It starts again from zero after about {{time}}.",
+    "native_limit_none": "Microsoft's free limit (about 10 hours of speech a day) has not been counted yet.",
 
     "browser_title": "Chrome or Edge",
     "browser_open_edge": "Open Edge",

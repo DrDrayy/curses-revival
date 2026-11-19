@@ -1,7 +1,7 @@
 import { STT_Backends, STT_State } from "@/server/services/stt/schema";
 import { ServiceNetworkState } from "@/types";
 import { invoke } from "@tauri-apps/api/tauri";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import { RiCharacterRecognitionFill, RiUserVoiceFill } from "react-icons/ri";
 import { SiGooglechrome, SiMicrosoftedge } from "react-icons/si";
 import { useSnapshot } from "valtio";
@@ -12,6 +12,44 @@ import { InputCheckbox, InputMapObject, InputMappedGroupSelect, InputSelect, Inp
 import NiceModal from "@ebay/nice-modal-react";
 import Modal from "../Modal";
 import { useTranslation } from 'react-i18next';
+
+// Microsoft's free speech recognition in the app: about 10 hours of speech a day
+const NATIVE_LIMIT_SECONDS = 36000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+type NativeLimitUsage = { used_seconds: number, checkpoint_ms: number | null };
+
+// how much of today's free limit is used, read from the app's browser files (read only)
+const NativeLimit: FC = () => {
+  const {t} = useTranslation();
+  const [usage, setUsage] = useState<NativeLimitUsage | null>(null);
+  useEffect(() => {
+    let alive = true;
+    const load = () => invoke<NativeLimitUsage | null>("plugin:speech_limit|usage")
+      .then(value => alive && setUsage(value ?? null))
+      .catch(() => alive && setUsage(null));
+    load();
+    const timer = setInterval(load, 60000);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
+  }, []);
+  if (!usage || !Number.isFinite(usage.used_seconds))
+    return <Inspector.Description>{t('stt.native_limit_none')}</Inspector.Description>;
+
+  const resetAt = usage.checkpoint_ms != null && Number.isFinite(usage.checkpoint_ms) ? usage.checkpoint_ms + DAY_MS : null;
+  // the count starts again with the first session after the reset time
+  const expired = resetAt != null && Date.now() >= resetAt;
+  const used = expired ? 0 : Math.min(Math.max(usage.used_seconds, 0), NATIVE_LIMIT_SECONDS);
+  const hours = (used / 3600).toFixed(1);
+  const time = resetAt != null && !expired
+    ? new Date(resetAt).toLocaleString([], { weekday: "short", hour: "2-digit", minute: "2-digit" })
+    : "";
+  return <Inspector.Description>
+    {t('stt.native_limit_used', { used: hours })}
+    {time && <> {t('stt.native_limit_reset', { time })}</>}
+  </Inspector.Description>;
+};
 
 const Native: FC = () => {
   const {t} = useTranslation();
@@ -28,6 +66,7 @@ const Native: FC = () => {
       value={{ option: pr.language, group: pr.language_group }}
       onChange={updateLanguage}
       library={nativeLangs} />
+    <NativeLimit />
     {/* <div className="p-2 border-2 border-error rounded-lg text-xs space-y-2 flex flex-col">
       <span className="font-bold text-error">Experimental. Might be unstable on some PCs.</span>
       <span className="font-bold text-error">Auto start is disabled.</span>
