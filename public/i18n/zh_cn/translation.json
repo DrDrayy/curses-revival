@@ -70,7 +70,7 @@
     "field_custom_words": "自定义词汇",
     "custom_words_desc": "每行一个：需要更准确识别的名字和词语（Azure 和 Deepgram）。",
     "field_profanity_filter": "过滤脏话和侮辱性词语",
-    "profanity_filter_desc": "无论使用哪种服务，都会在字幕、VRChat 聊天框、Twitch 和文字转语音中把脏话和侮辱性词语替换为 ****。hell、damn 等轻微词语不会被屏蔽。",
+    "profanity_filter_desc": "无论使用哪种服务都会屏蔽脏话和侮辱性词语：在 VRChat 聊天框和 Twitch 中替换为 ****，在 OBS 叠加层中使用字幕自己的遮罩（默认为 [redacted]），文字转语音会跳过它们。hell、damn 等轻微词语不会被屏蔽。",
     "field_profanity_sexual": "同时过滤性相关词语",
     "field_profanity_extra": "额外过滤的词语（每行一个）",
     "field_sentence_pause": "句间停顿（毫秒）",

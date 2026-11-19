@@ -70,7 +70,7 @@
     "field_custom_words": "Custom words",
     "custom_words_desc": "One per line: names and words that should be recognised better (Azure and Deepgram).",
     "field_profanity_filter": "Filter swears and slurs",
-    "profanity_filter_desc": "Masks swears and slurs as **** in captions, the VRChat chatbox, Twitch and text-to-speech, whatever service you use. Mild words like hell or damn are not masked.",
+    "profanity_filter_desc": "Masks swears and slurs whatever service you use: as **** in the VRChat chatbox and Twitch, with the caption's own mask in the OBS overlay ([redacted] by default), and text-to-speech skips them. Mild words like hell or damn are not masked.",
     "field_profanity_sexual": "Also filter sexual words",
     "field_profanity_extra": "Extra words to filter (one per line)",
     "field_sentence_pause": "Sentence pause (ms)",
