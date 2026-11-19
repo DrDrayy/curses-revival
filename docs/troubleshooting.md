@@ -65,7 +65,7 @@ Not every language works with Nova-3. In the **Speech to text** tab, change **Mo
 
 ## Settings are gone after switching builds
 
-Going from the beta build to the fixes build can drop the settings that only exist in beta (like custom words or the Twitch Client ID). Write them down before you switch. Going from fixes to features keeps your settings.
+Going from the beta build to the fixes build can drop the settings that only exist in beta (like custom words or the Twitch Client ID). Write them down before you switch. Going from fixes to beta keeps your settings.
 
 If a settings file cannot be read, the app keeps a copy named like `settings.<number>.bak` in its data folder.
 
