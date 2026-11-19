@@ -58,11 +58,15 @@ const Browser: FC = () => {
     });
   };
 
-  const handleOpenEdge = () => {
+  // Edge in app mode works the same way as Chrome
+  const handleStartEdge = () => {
+    if (!pr.language)
+      return;
     invoke("plugin:web|open_browser", {
       data: {
         browser: "msedge",
-        url: micUrl
+        url: `${micUrl}?lang=${encodeURIComponent(pr.language)}${pr.offline ? "#offline" : ""}`,
+        app: true
       }
     });
   };
@@ -77,7 +81,7 @@ const Browser: FC = () => {
       library={nativeLangs} />
     <InputCheckbox label="stt.browser_offline" onChange={e => window.ApiServer.state.services.stt.data.browser.offline = e} value={pr.offline} />
     <button className="btn btn-sm btn-primary gap-2" disabled={!pr.language} onClick={handleStartChrome}><SiGooglechrome/> {t('stt.browser_start_chrome')}</button>
-    <button className="btn btn-sm btn-neutral gap-2" onClick={handleOpenEdge}><SiMicrosoftedge/> {t('stt.browser_edge_unreliable')}</button>
+    <button className="btn btn-sm btn-primary gap-2" disabled={!pr.language} onClick={handleStartEdge}><SiMicrosoftedge/> {t('stt.browser_start_edge')}</button>
   </>
 }
 
@@ -225,6 +229,12 @@ const Inspector_STT: FC = () => {
       <InputCheckbox label="common.field_auto_start" value={data.data.autoStart} onChange={e => up("autoStart", e)} />
       <InputCheckbox label="stt.field_stop_with_stream" value={data.data.stopWithStream} onChange={e => up("stopWithStream", e)} />
       <span className="link link-accent link-hover font-semibold flex items-center gap-2 text-sm" onClick={handleShowReplacements}><RiCharacterRecognitionFill/>{t('common.btn_edit_replacements')}</span>
+      <InputCheckbox label="stt.field_profanity_filter" value={data.data.profanityFilter} onChange={e => up("profanityFilter", e)} />
+      <Inspector.Description>{t('stt.profanity_filter_desc')}</Inspector.Description>
+      {data.data.profanityFilter && <>
+        <InputCheckbox label="stt.field_profanity_sexual" value={data.data.profanitySexual} onChange={e => up("profanitySexual", e)} />
+        <InputTextArea label="stt.field_profanity_extra" value={data.data.profanityExtra} onChange={e => up("profanityExtra", e.target.value)} />
+      </>}
       <Inspector.Deactivatable active={state.status === ServiceNetworkState.disconnected}>
         <InputTextArea label="stt.field_custom_words" value={data.data.customWords} onChange={e => up("customWords", e.target.value)} />
         <Inspector.Description>{t('stt.custom_words_desc')}</Inspector.Description>

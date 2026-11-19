@@ -52,6 +52,9 @@ class Service_TTS implements IServiceInterface, ITTSReceiver {
         return cache.map[cache.ignoreCase ? v.toLowerCase() : v] ?? v;
       });
     }
+    // drop masked words (two or more "*", from a swear filter), so no voice reads asterisks;
+    // a single "*" (5*3, *great*) is left alone
+    result = result.replace(/\S*\*{2,}\S*/g, "").replace(/\s{2,}/g, " ").trim();
     return result.replace(/[<>]/g, ""); // clear ssml tags, always
   }
 

@@ -61,14 +61,18 @@
   },
   "stt": {
     "service_microsoft": "Microsoft（免费，不稳定）",
-    "service_google": "Google（免费，通过 Chrome）",
+    "service_google": "Chrome 或 Edge（免费）",
     "browser_offline": "离线（在本机运行，需要 Chrome 139 或更新版本）",
-    "browser_start_chrome": "在 Chrome 中开始",
-    "browser_edge_unreliable": "打开 Edge（Microsoft，不稳定）",
+    "browser_start_chrome": "在 Chrome 中开始（Google）",
+    "browser_start_edge": "在 Edge 中开始（Microsoft）",
     "deepgram_model": "模型",
     "deepgram_model_notice": "如果你的语言无法使用 Nova-3，请选择 Nova-2。",
     "field_custom_words": "自定义词汇",
     "custom_words_desc": "每行一个：需要更准确识别的名字和词语（Azure 和 Deepgram）。",
+    "field_profanity_filter": "过滤脏话和侮辱性词语",
+    "profanity_filter_desc": "无论使用哪种服务，都会在字幕、VRChat 聊天框、Twitch 和文字转语音中把脏话和侮辱性词语替换为 ****。hell、damn 等轻微词语不会被屏蔽。",
+    "field_profanity_sexual": "同时过滤性相关词语",
+    "field_profanity_extra": "额外过滤的词语（每行一个）",
     "field_sentence_pause": "句间停顿（毫秒）",
     "sentence_pause_desc": "多长的停顿算作一句结束。越低字幕越快，越高句子越少被拆开。留空为默认（Azure 和 Deepgram）。",
     "title": "语音转文本",
@@ -80,7 +84,7 @@
 
     "native_title": "本地",
 
-    "browser_title": "Google（通过 Chrome）",
+    "browser_title": "Chrome 或 Edge",
     "browser_open_edge": "打开 Edge",
     "browser_open_chrome": "打开 Chrome",
 

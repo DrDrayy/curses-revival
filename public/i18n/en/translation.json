@@ -61,14 +61,18 @@
   },
   "stt": {
     "service_microsoft": "Microsoft (free, not reliable)",
-    "service_google": "Google (free, via Chrome)",
+    "service_google": "Chrome or Edge (free)",
     "browser_offline": "Offline (on this PC, Chrome 139 or newer)",
-    "browser_start_chrome": "Start in Chrome",
-    "browser_edge_unreliable": "Open Edge (Microsoft, not reliable)",
+    "browser_start_chrome": "Start in Chrome (Google)",
+    "browser_start_edge": "Start in Edge (Microsoft)",
     "deepgram_model": "Model",
     "deepgram_model_notice": "If your language doesn't work with Nova-3, pick Nova-2.",
     "field_custom_words": "Custom words",
     "custom_words_desc": "One per line: names and words that should be recognised better (Azure and Deepgram).",
+    "field_profanity_filter": "Filter swears and slurs",
+    "profanity_filter_desc": "Masks swears and slurs as **** in captions, the VRChat chatbox, Twitch and text-to-speech, whatever service you use. Mild words like hell or damn are not masked.",
+    "field_profanity_sexual": "Also filter sexual words",
+    "field_profanity_extra": "Extra words to filter (one per line)",
     "field_sentence_pause": "Sentence pause (ms)",
     "sentence_pause_desc": "How long a pause ends a sentence. Lower = faster captions, higher = fewer split sentences. Empty = default (Azure and Deepgram).",
     "title": "Speech to text",
@@ -81,7 +85,7 @@
 
     "native_title": "Native",
 
-    "browser_title": "Google (via Chrome)",
+    "browser_title": "Chrome or Edge",
     "browser_open_edge": "Open Edge",
     "browser_open_chrome": "Open Chrome",
 

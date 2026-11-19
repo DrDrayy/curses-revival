@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { proxy } from "valtio";
 import { subscribeKey } from "valtio/utils";
 import { STT_Backends } from "./schema";
+import { ProfanityFilter, buildProfanityFilter, parseProfanityExtra } from "./profanity";
 import { STT_AzureService } from "./services/azure";
 import { STT_DeepgramService } from "./services/deepgram";
 import { STT_NativeService } from "./services/native";
@@ -34,6 +35,7 @@ class Service_STT implements IServiceInterface, ISTTReceiver {
   }
 
   #_wordReplacementsCache!: WordReplacementsCache;
+  #_profanityFilter?: ProfanityFilter;
 
   updateLastMessage(value: string, isInterim: boolean) {
     this.#lastMessageState = {value, isInterim};
@@ -88,6 +90,19 @@ class Service_STT implements IServiceInterface, ISTTReceiver {
     this.#_wordReplacementsCache = buildWordReplacementsCache(this.data.replaceWords, this.data.replaceWordsIgnoreCase);
   }
 
+  updateProfanityFilter() {
+    this.#_profanityFilter = buildProfanityFilter({
+      sexual: this.data.profanitySexual,
+      extra: parseProfanityExtra(this.data.profanityExtra)
+    });
+  }
+
+  runProfanityFilter(value: string) {
+    if (!this.data.profanityFilter || !this.#_profanityFilter)
+      return value;
+    return this.#_profanityFilter(value);
+  }
+
   runReplacements(value: string) {
     const cache = this.#_wordReplacementsCache;
     if (!cache || cache.isEmpty)
@@ -114,6 +129,10 @@ class Service_STT implements IServiceInterface, ISTTReceiver {
     this.updateReplacementsCache();
     subscribeKey(this.data, "replaceWords", () => this.updateReplacementsCache());
     subscribeKey(this.data, "replaceWordsIgnoreCase", () => this.updateReplacementsCache());
+    this.updateProfanityFilter();
+    subscribeKey(this.data, "profanityFilter", () => this.updateProfanityFilter());
+    subscribeKey(this.data, "profanitySexual", () => this.updateProfanityFilter());
+    subscribeKey(this.data, "profanityExtra", () => this.updateProfanityFilter());
 
     window.ApiShared.pubsub.subscribe("stream.on_ended", () => {
       if (this.data.stopWithStream && this.serviceState.status === ServiceNetworkState.connected) {
@@ -149,6 +168,7 @@ class Service_STT implements IServiceInterface, ISTTReceiver {
     }
 
     value = this.runReplacements(value);
+    value = this.runProfanityFilter(value);
     !this.isMuted() &&
     window.ApiShared.pubsub.publishText(TextEventSource.stt, {
       value,
@@ -167,6 +187,7 @@ class Service_STT implements IServiceInterface, ISTTReceiver {
       value = await invoke<string>("plugin:uwu|translate", {value: sentence});
     }
     value = this.runReplacements(value);
+    value = this.runProfanityFilter(value);
     !this.isMuted() &&
     window.ApiShared.pubsub.publishText(TextEventSource.stt, {
       value,

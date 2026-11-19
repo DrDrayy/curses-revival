@@ -23,6 +23,11 @@ export const Service_STT_Schema = z.object({
   customWords: zSafe(z.coerce.string(), ""),
   // how long a pause ends a sentence, in ms; empty = the service default
   sentencePauseMs: zSafe(z.coerce.string(), ""),
+  // mask swears and slurs (profanity.ts) in every service's text
+  profanityFilter: zSafe(z.coerce.boolean(), false),
+  profanitySexual: zSafe(z.coerce.boolean(), false),
+  // the user's own words to mask, one per line
+  profanityExtra: zSafe(z.coerce.string(), ""),
   native: z.object({
     language_group: zSafe(z.coerce.string(), ""),
     language: zSafe(z.coerce.string(), ""),
