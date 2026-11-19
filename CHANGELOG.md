@@ -2,6 +2,11 @@
 
 All notable changes to this fork of [curses by mmpneo](https://github.com/mmpneo/curses). Based on the original at its last commit (June 2024). Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+- Troubleshooting and speech-to-text guides explain the Native "network" error and recommend Browser with Chrome, or Deepgram / Azure.
+
 ## [0.1.1] - 2026-11-12
 
 ### Changed

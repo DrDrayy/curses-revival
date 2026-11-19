@@ -33,6 +33,15 @@ Open the **OBS Studio** tab, find **Native stream captions** and tick **Enable**
 
 Only one app can listen on port 9001, VRChat's default OSC output port. Another OSC app may have it. Close that app, then untick and tick **Pause chatbox while AFK** again. Or turn the option off.
 
+## Speech to text says "network", or stops after a while (Native)
+
+**Native** does not recognise speech on your PC. It sends your voice to Microsoft's online speech service through the app's built-in browser, and "network" means that trip failed. This is almost always on Microsoft's side, not your internet: the browser built into apps often cannot reach that service, and Microsoft's speech service has been unreliable in Edge too.
+
+- Switch **Service** to **Browser** and press **Open Chrome**. Chrome uses Google's speech service, which is usually reliable. Keep the Chrome tab open while you stream.
+- **Open Edge** uses the same Microsoft service as Native, so it can fail the same way.
+- For the most reliable results, use **Deepgram** or **Azure**. Both need a free account and a key, give some free use to start with, and then charge (see [Speech to text](speech-to-text.md)).
+- If Chrome fails too, check whether a firewall, VPN or antivirus blocks the browser.
+
 ## Deepgram gives a language error with Nova-3
 
 Not every language works with Nova-3. In the **Speech to text** tab, change **Model** to **Nova-2 (more languages)**.
