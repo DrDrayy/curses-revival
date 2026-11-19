@@ -572,9 +572,23 @@
         }
         isStarted = true;
 
-        sttInstance.onend = () => sttInstance && sttInstance.start();
+        // errors in a row since the last result: restart at once after a normal end, wait after an error
+        let errorRun = 0;
+        let endAfterError = false;
+        sttInstance.onend = () => {
+          if (!sttInstance)
+            return;
+          const delay = endAfterError ? Math.min(1000 * 2 ** (errorRun - 1), 10000) : 0;
+          endAfterError = false;
+          const instance = sttInstance;
+          setTimeout(() => {
+            if (sttInstance === instance)
+              instance.start();
+          }, delay);
+        };
 
         sttInstance.onresult = (event) => {
+          errorRun = 0;
           try {
             let interim_transcript = '';
             let final_transcript = '';
@@ -591,7 +605,19 @@
             }
           } catch (error) { }
         }
-        sttInstance.onerror = (e) => console.log(e);
+        sttInstance.onerror = (e) => {
+          console.log(e);
+          // silence, or our own stop
+          if (e.error === "no-speech" || e.error === "aborted")
+            return;
+          errorRun++;
+          endAfterError = true;
+          // the offline engine refused after all: use the online service from the next start on
+          if (sttInstance && sttInstance.processLocally) {
+            sttInstance.processLocally = false;
+            setStatus(`${onlineName} - offline did not work (${e.error})`);
+          }
+        };
 
         window.onbeforeunload = () => {
           sttInstance && sttInstance.stop();
