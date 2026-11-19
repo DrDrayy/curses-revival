@@ -4,6 +4,10 @@ All notable changes to this fork of [curses by mmpneo](https://github.com/mmpneo
 
 ## [0.1.3] - 2026-11-19
 
+### Added (features build)
+- **Start in Edge (Microsoft)** next to **Start in Chrome (Google)**: one click opens a small window with your language set and starts listening. The service is now called **Chrome or Edge (free)**.
+- **Filter swears and slurs** for every speech-to-text service, including Chrome: masks them as `****` in captions, the VRChat chatbox and Twitch chat; text-to-speech skips them. Optional **Also filter sexual words** and **Extra words to filter**. Mild words like hell or damn are not masked. Word list: profanity-list by David Sojevic (MIT).
+
 ### Fixed (both builds)
 - The browser speech page (Chrome or Edge) sends live text to curses at once. It used to drop updates for 0.4 seconds after each one, so captions lagged behind the in-app services.
 

@@ -43,6 +43,15 @@ Only one app can listen on port 9001, VRChat's default OSC output port. Another 
 - For the most reliable results, use **Deepgram** or **Azure**. Both need a free account and a key, give some free use to start with, and then charge (see [Speech to text](speech-to-text.md)).
 - If Chrome fails too, check whether a firewall, VPN or antivirus blocks the browser.
 
+## Edge (or Chrome) misses words or lags
+
+The browser can slow down a page it thinks you are not looking at. In Edge, open **Settings > System and performance**:
+
+- under **Sleeping tabs**, add `localhost:3030` to **Never put these sites to sleep**;
+- turn **Efficiency mode** off while you stream.
+
+Keep the speech window open (minimised is fine) and do not close it. In Chrome, check **Settings > Performance** for **Memory saver** and add the same site to the list of sites that always stay active.
+
 ## Deepgram gives a language error with Nova-3
 
 Not every language works with Nova-3. In the **Speech to text** tab, change **Model** to **Nova-2 (more languages)**.

@@ -88,6 +88,7 @@ The result is in `src-tauri/target/release/` (the `.exe`, and an `.msi` in `bund
 ## Credits
 
 - [curses by mmpneo](https://github.com/mmpneo/curses): the original project and its author. All the hard work is theirs. Their support and community links are in the original repository.
+- The swear and slur filter uses [profanity-list by David Sojevic](https://github.com/dsojevic/profanity-list) (MIT license).
 - Thanks to everyone who tests this fork and reports problems.
 
 ## License
