@@ -11,6 +11,9 @@ const MS_PER_CHAR = 25;
 const MAX_WAITING = 3;
 // live text: at most one update this often (faster chatbox messages get dropped or timed out by VRChat)
 const LIVE_GAP = 1500;
+// live text that arrives this soon after a finished sentence is a late part of that sentence (the UwU
+// filter can delay it): it must not replace the finished sentence
+const LATE_LIVE_MS = 500;
 
 // the newest words that fit in the chatbox
 function lastPart(text: string, max: number) {
@@ -34,6 +37,7 @@ class VRC_TextboxTarget implements IVRCTarget {
   #liveText = "";
   #liveSent = "";
   #liveTimer?: ReturnType<typeof setTimeout>;
+  #lastFinalAt = 0;
 
   #sendChunk(text: string) {
     sendOsc("/chatbox/input", [
@@ -71,8 +75,8 @@ class VRC_TextboxTarget implements IVRCTarget {
       return;
     this.#liveTimer = setTimeout(() => {
       this.#liveTimer = undefined;
-      // finished sentences still waiting go first
-      if (this.#timer !== undefined || this.#queue.length)
+      // switched off meanwhile; finished sentences still waiting go first
+      if (!this.state.liveText || this.#timer !== undefined || this.#queue.length)
         return;
       if (Date.now() < this.#nextSendAt)
         return this.#scheduleLive();
@@ -92,6 +96,7 @@ class VRC_TextboxTarget implements IVRCTarget {
   pushFinal(value: string): void {
     // the finished sentence replaces the live text
     this.#stopLive();
+    this.#lastFinalAt = Date.now();
     // the message replaces the typing bubble
     this.#stopIndicator();
     // the chatbox shows at most 9 lines: no line breaks
@@ -131,7 +136,7 @@ class VRC_TextboxTarget implements IVRCTarget {
     }
   }
   pushInterim(value: string): void {
-    if (this.state.liveText) {
+    if (this.state.liveText && Date.now() - this.#lastFinalAt >= LATE_LIVE_MS) {
       const text = lastPart((value ?? "").replace(/\s+/g, " ").trim(), MAX_LENGTH);
       if (text) {
         this.#liveText = text;
