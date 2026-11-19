@@ -38,11 +38,22 @@ const Native: FC = () => {
 
 const Browser: FC = () => {
   const {t} = useTranslation();
-  const handleOpen = () => {
+  const pr = useSnapshot(window.ApiServer.state.services.stt.data.browser);
+  const updateLanguage = (value: { group: string, option: string }) => {
+    window.ApiServer.state.services.stt.data.browser.language       = value.option;
+    window.ApiServer.state.services.stt.data.browser.language_group = value.group;
+  };
+  const micUrl = `http://localhost:${window.Config.serverNetwork.port}/mic.html`;
+
+  // Chrome in app mode: the page picks the language from ?lang= and starts listening by itself
+  const handleStartChrome = () => {
+    if (!pr.language)
+      return;
     invoke("plugin:web|open_browser", {
       data: {
         browser: "chrome",
-        url: `http://localhost:${window.Config.serverNetwork.port}/mic.html`
+        url: `${micUrl}?lang=${encodeURIComponent(pr.language)}${pr.offline ? "#offline" : ""}`,
+        app: true
       }
     });
   };
@@ -51,18 +62,22 @@ const Browser: FC = () => {
     invoke("plugin:web|open_browser", {
       data: {
         browser: "msedge",
-        url: `http://localhost:${window.Config.serverNetwork.port}/mic.html`
+        url: micUrl
       }
     });
   };
 
-  const handleStartStt = () => {
-    invoke("plugin:windows_stt|start");
-  };
   return <>
     <Inspector.SubHeader>{t('stt.browser_title')}</Inspector.SubHeader>
-    <button className="btn btn-sm btn-neutral gap-2" onClick={handleOpen}><SiGooglechrome/> Open Chrome</button>
-    <button className="btn btn-sm btn-neutral gap-2" onClick={handleOpenEdge}><SiMicrosoftedge/> Open Edge</button>
+    <InputMappedGroupSelect
+      labelGroup="common.field_language"
+      labelOption="common.field_dialect"
+      value={{ option: pr.language, group: pr.language_group }}
+      onChange={updateLanguage}
+      library={nativeLangs} />
+    <InputCheckbox label="stt.browser_offline" onChange={e => window.ApiServer.state.services.stt.data.browser.offline = e} value={pr.offline} />
+    <button className="btn btn-sm btn-primary gap-2" disabled={!pr.language} onClick={handleStartChrome}><SiGooglechrome/> {t('stt.browser_start_chrome')}</button>
+    <button className="btn btn-sm btn-neutral gap-2" onClick={handleOpenEdge}><SiMicrosoftedge/> {t('stt.browser_edge_unreliable')}</button>
   </>
 }
 
@@ -216,8 +231,8 @@ const Inspector_STT: FC = () => {
         <InputText type="number" step="1" label="stt.field_sentence_pause" value={data.data.sentencePauseMs} onChange={e => up("sentencePauseMs", e.target.value)} />
         <Inspector.Description>{t('stt.sentence_pause_desc')}</Inspector.Description>
         <InputSelect options={[
-          { label: "Native (not reliable)", value: STT_Backends.native },
-          { label: "Browser", value: STT_Backends.browser },
+          { label: t('stt.service_microsoft'), value: STT_Backends.native },
+          { label: t('stt.service_google'), value: STT_Backends.browser },
           { label: "Azure", value: STT_Backends.azure },
           { label: "Deepgram", value: STT_Backends.deepgram },
           // Speechly is shut down (speechly.com redirects to roblox.com), so it is no longer offered

@@ -60,6 +60,11 @@
     "section_integrations": "Integrations"
   },
   "stt": {
+    "service_microsoft": "Microsoft (free, not reliable)",
+    "service_google": "Google (free, via Chrome)",
+    "browser_offline": "Offline (on this PC, Chrome 139 or newer)",
+    "browser_start_chrome": "Start in Chrome",
+    "browser_edge_unreliable": "Open Edge (Microsoft, not reliable)",
     "deepgram_model": "Model",
     "deepgram_model_notice": "If your language doesn't work with Nova-3, pick Nova-2.",
     "field_custom_words": "Custom words",
@@ -76,7 +81,7 @@
 
     "native_title": "Native",
 
-    "browser_title": "Browser",
+    "browser_title": "Google (via Chrome)",
     "browser_open_edge": "Open Edge",
     "browser_open_chrome": "Open Chrome",
 

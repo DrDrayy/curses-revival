@@ -141,6 +141,9 @@ async fn config(config: State<'_, AppConfiguration>) -> Result<WebConfig, String
 struct OpenBrowserCommand {
     browser: String,
     url: String,
+    /// open the page as an app window (`--app=<url>`, no tabs or address bar); false when not sent
+    #[serde(default)]
+    app: bool,
 }
 
 /// The url is put on a `cmd /C start` command line: only plain http(s) addresses without
@@ -158,8 +161,9 @@ fn open_browser(data: OpenBrowserCommand) {
         return;
     }
     if cfg!(target_os = "windows") {
+        let target = if data.app { format!("--app={}", &data.url) } else { data.url.clone() };
         Command::new("cmd")
-            .args(&["/C", format!("start {} {}", &data.browser, &data.url).as_str()])
+            .args(&["/C", format!("start {} {}", &data.browser, &target).as_str()])
             .output()
             .ok();
     }

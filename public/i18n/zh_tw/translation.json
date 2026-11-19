@@ -60,6 +60,11 @@
     "section_integrations": "集成"
   },
   "stt": {
+    "service_microsoft": "Microsoft（免費，不穩定）",
+    "service_google": "Google（免費，透過 Chrome）",
+    "browser_offline": "離線（在本機執行，需要 Chrome 139 或更新版本）",
+    "browser_start_chrome": "在 Chrome 中開始",
+    "browser_edge_unreliable": "開啟 Edge（Microsoft，不穩定）",
     "deepgram_model": "模型",
     "deepgram_model_notice": "如果你的語言無法使用 Nova-3，請選擇 Nova-2。",
     "field_custom_words": "自訂詞彙",
@@ -75,7 +80,7 @@
 
     "native_title": "本地",
 
-    "browser_title": "瀏覽器",
+    "browser_title": "Google（透過 Chrome）",
     "browser_open_edge": "打開 Edge",
     "browser_open_chrome": "打開 Chrome",
 

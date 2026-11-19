@@ -349,6 +349,15 @@
       color: rgb(99, 99, 102);
       font-size: 1.2rem;
     }
+
+    #status {
+      font-size: 1.4rem;
+      color: rgb(174, 174, 178);
+    }
+
+    #button-download[hidden] {
+      display: none;
+    }
   </style>
 </head>
 
@@ -358,7 +367,9 @@
   </div>
   <div class="actionbar">
     <div class="logo">Curses remote microphone</div>
+    <div id="status"></div>
     <div class="actions">
+      <button id="button-download" hidden>Download offline speech model</button>
       <select value="English" id="select-lang"></select>
       <select id="select-dial"></select>
       <button id="button-start" @click="pog()">Start</button>
@@ -371,6 +382,8 @@
       const selectDial = document.getElementById("select-dial");
       const buttonStart = document.getElementById("button-start");
       const listElement = document.getElementById("list");
+      const statusElement = document.getElementById("status");
+      const buttonDownload = document.getElementById("button-download");
 
       let host = location.hostname;
       let port = location.port;
@@ -381,6 +394,12 @@
         host = q.get("host");
       if (q.has("port") && /^\d{1,5}$/.test(q.get("port")))
         port = q.get("port");
+      // ?lang=<code>: pick that dialect and start listening by itself (the app's "Start in Chrome")
+      const langParam = q.get("lang");
+      const autoLang = langParam && /^[a-z]{2,3}(-[A-Za-z0-9]{2,8}){0,2}$/.test(langParam) ? langParam : null;
+      // #offline: try Chrome's on-device speech recognition (Chrome 139+), else fall back to online
+      const wantOffline = location.hash === "#offline";
+      const onlineName = /\bEdg\//.test(navigator.userAgent) ? "Online (Microsoft)" : "Online (Google)";
 
       selectLang.oninput = e => handleSelectLang(e.target.value);
       selectDial.oninput = e => handleSelectDial(e.target.value);
@@ -398,6 +417,12 @@
 
       let sttInstance = null
       let isStarted = false;
+      let isStarting = false;
+
+      function setStatus(text) {
+        statusElement.textContent = text;
+      }
+      setStatus(wantOffline ? "Offline (on this PC) is tried when listening starts" : onlineName);
 
       const ws = new WebSocket(`ws://${host}:${port}/pubsub?id=${Math.random()}-${Date.now()}`);
       ws.onopen = () => console.log("opened");
@@ -450,6 +475,20 @@
         selectedDial = dialect;
       }
 
+      const autoGroup = autoLang && langs.find(l => l.slice(1).some(d => d[0] === autoLang));
+      if (autoGroup) {
+        selectLang.value = autoGroup[0];
+        handleSelectLang(autoGroup[0]);
+        selectDial.value = autoLang;
+        handleSelectDial(autoLang);
+        // start once the link to curses is open, so no text is lost
+        const autoStart = () => !isStarted && startSTT();
+        if (ws.readyState === ws.OPEN)
+          autoStart();
+        else
+          ws.addEventListener("open", autoStart, { once: true });
+      }
+
       function send(obj) {
         (ws.OPEN === ws.readyState) && ws.send(JSON.stringify(obj));
       }
@@ -464,13 +503,69 @@
       }
     
 
+      // decides whether this language can be recognised on this PC; never throws
+      async function prepareOffline(SpeechRecognition, lang) {
+        try {
+          if (!SpeechRecognition || typeof SpeechRecognition.available !== "function")
+            return { local: false, reason: "this browser has no offline speech" };
+          const options = { langs: [lang], processLocally: true };
+          const availability = await SpeechRecognition.available(options);
+          if (availability === "available")
+            return { local: true };
+          if (availability === "downloadable" || availability === "downloading") {
+            if (typeof SpeechRecognition.install !== "function")
+              return { local: false, reason: "this browser can't download the offline model" };
+            try {
+              if (await SpeechRecognition.install(options) === true)
+                return { local: true };
+            } catch (error) { }
+            buttonDownload.hidden = false;
+            return { local: false, reason: "the offline model is not downloaded yet" };
+          }
+          return { local: false, reason: "no offline model for this language" };
+        } catch (error) {
+          return { local: false, reason: "the offline check failed" };
+        }
+      }
+
+      // the download may need a click on the page: install, then listen again
+      buttonDownload.onclick = async () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let ok = false;
+        try {
+          ok = !!SpeechRecognition && typeof SpeechRecognition.install === "function"
+            && await SpeechRecognition.install({ langs: [selectDial.value], processLocally: true }) === true;
+        } catch (error) { }
+        if (!ok) {
+          setStatus(`${onlineName} - the offline model could not be downloaded`);
+          return;
+        }
+        buttonDownload.hidden = true;
+        if (isStarted)
+          startSTT(); // stop
+        startSTT();
+      };
+
       async function spawnInstance() {
         await navigator.mediaDevices.getUserMedia({ audio: true });
         let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+        if (!SpeechRecognition) {
+          setStatus("This browser has no speech recognition. Use Chrome.");
+          return;
+        }
+        const lang = selectDial.value;
+        let mode = { local: false };
+        if (wantOffline)
+          mode = await prepareOffline(SpeechRecognition, lang);
         sttInstance = new SpeechRecognition();
         sttInstance.continuous = true;
         sttInstance.interimResults = true;
-        sttInstance.lang = selectDial.value;
+        sttInstance.lang = lang;
+        if (mode.local) {
+          sttInstance.processLocally = true;
+          setStatus("Offline (on this PC)");
+        } else
+          setStatus(mode.reason ? `${onlineName} - ${mode.reason}` : onlineName);
         sttInstance.start();
         sttInstance.onstart = () => {
           buttonStart.textContent = "Listening..."
@@ -503,9 +598,19 @@
         }
       }
 
-      function startSTT() {
-        if (!isStarted)
-          spawnInstance();
+      async function startSTT() {
+        if (isStarting)
+          return;
+        if (!isStarted) {
+          isStarting = true;
+          try {
+            await spawnInstance();
+          } catch (error) {
+            setStatus(`Could not start: ${error && error.message || error}`);
+          } finally {
+            isStarting = false;
+          }
+        }
         else if (sttInstance) {
           isStarted = false;
           buttonStart.textContent = "Start"

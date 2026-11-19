@@ -10,7 +10,7 @@ import {
 const NETWORK_RETRIES = 5;
 // waits before each new try (ms); about 25 s in total before giving up
 const RETRY_DELAYS = [1000, 2000, 4000, 8000, 10000];
-export const NATIVE_GIVE_UP_MESSAGE = "Microsoft's speech service is not answering (network error). Try Browser with Chrome, Deepgram or Azure.";
+export const NATIVE_GIVE_UP_MESSAGE = "Microsoft's speech service is not answering (network error). Try Google (via Chrome), Deepgram or Azure.";
 
 export class STT_NativeService implements ISTTService {
   constructor(private bindings: ISTTReceiver) {}

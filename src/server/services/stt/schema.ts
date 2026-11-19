@@ -27,6 +27,12 @@ export const Service_STT_Schema = z.object({
     language_group: zSafe(z.coerce.string(), ""),
     language: zSafe(z.coerce.string(), ""),
   }).default({}),
+  // Google (Chrome's speech on the mic page): language for the one-click start
+  browser: z.object({
+    language_group: zSafe(z.coerce.string(), ""),
+    language: zSafe(z.coerce.string(), ""),
+    offline: zSafe(z.coerce.boolean(), false),
+  }).default({}),
   azure: z.object({
     device: zSafe(z.coerce.string(), "default"),
     language_group: zSafe(z.coerce.string(), ""),
