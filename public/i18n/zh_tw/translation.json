@@ -83,6 +83,8 @@
     "state_": "靜音",
 
     "native_title": "本地",
+    "native_give_up": "微軟語音服務沒有回應（網路錯誤）。請改用 Chrome 或 Edge（免費）、Deepgram 或 Azure。",
+    "native_daily_limit": "微軟語音服務拒絕啟動。很可能是它的每日免費額度（約 10 小時語音）已用完，24 小時內會恢復。在此之前，請使用 Chrome 或 Edge（免費）、Deepgram 或 Azure。",
 
     "browser_title": "Chrome 或 Edge",
     "browser_open_edge": "打開 Edge",

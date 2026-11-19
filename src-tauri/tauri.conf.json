@@ -66,6 +66,7 @@
     },
     "windows": [
       {
+        "additionalBrowserArgs": "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection,msSpeechRecognitionServiceUseCetoService",
         "fullscreen": false,
         "height": 600,
         "resizable": true,
