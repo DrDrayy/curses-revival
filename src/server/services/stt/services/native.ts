@@ -50,6 +50,7 @@ export class STT_NativeService implements ISTTService {
 
     this.#stopped = false;
     this.#networkFails = 0;
+    this.#endAfterError = false;
     this.#instance.onstart = () => this.bindings.onStart();
     this.#instance.onresult = (event: any) => {
       // the service answered: count network failures from zero again
