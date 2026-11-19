@@ -6,8 +6,8 @@ Open the **Speech to text** tab. Pick a **Service**, fill in what it asks for, a
 
 | Service | Needs | Notes |
 |---|---|---|
-| **Native** | Nothing | Uses the speech recognition of the app's built-in browser engine. Pick a language and dialect. If it does not work on your PC, use **Browser**. |
-| **Browser** | Chrome or Edge | Press **Open Chrome** or **Open Edge**. A page opens that listens to your mic. Keep it open. |
+| **Native** | Nothing | Sends your voice to Microsoft's online speech service through the app's built-in browser. It often fails with a "network" message or stops after a while (see [Troubleshooting](troubleshooting.md)). If so, use **Browser** with Chrome. |
+| **Browser** | Chrome or Edge | Press **Open Chrome** or **Open Edge**. A page opens that listens to your mic. Keep it open. Chrome is the more reliable choice: Edge uses the same Microsoft service as Native. |
 | **Azure** | An Azure Speech key | Fill in **Key** and **Location**, pick a language. |
 | **Deepgram** | A Deepgram API key | Fill in **Key**, pick a language and a model. |
 
