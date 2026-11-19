@@ -582,8 +582,13 @@
           endAfterError = false;
           const instance = sttInstance;
           setTimeout(() => {
-            if (sttInstance === instance)
+            if (sttInstance !== instance)
+              return;
+            try {
               instance.start();
+            } catch (error) {
+              setStatus(`Listening stopped: ${error && error.message || error}. Press Start again.`);
+            }
           }, delay);
         };
 
