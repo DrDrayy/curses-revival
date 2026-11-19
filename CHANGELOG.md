@@ -2,6 +2,17 @@
 
 All notable changes to this fork of [curses by mmpneo](https://github.com/mmpneo/curses). Based on the original at its last commit (June 2024). Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.1.5] - 2026-11-19
+
+### Security (both builds)
+- Updated the building blocks that had known security problems. Rust side: tokio, h2, bytes, mio, openssl, time, serde_with, rand and others. JavaScript side: lodash, validator, postcss, crypto-js and others, plus the build tools (vite 5.4, rollup, babel and their helpers). Most of what is left only affects the build tools or needs a bigger upgrade.
+
+### Fixed (both builds)
+- Test downloads from branches whose name contains "/" no longer fail.
+
+### Docs
+- The swear filter shows the overlay's own mask in OBS (`[redacted]` by default), not `****`.
+
 ## [0.1.4] - 2026-11-19
 
 ### Changed

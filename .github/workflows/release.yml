@@ -23,7 +23,7 @@ jobs:
         with:
           version: 9
 
-      # pinned: the locked "time" crate (0.3.30) does not compile on Rust 1.80 and newer
+      # pinned: the releases are built and tested with this Rust version
       - name: setup rust
         uses: dtolnay/rust-toolchain@1.79.0
 
@@ -36,12 +36,21 @@ jobs:
         env:
           CURSES_TWITCH_CLIENT_ID: ${{ secrets.CURSES_TWITCH_CLIENT_ID }}
 
+      # one download per branch or tag: curses-fixes, curses-beta (the features branch holds the beta build),
+      # curses-v0.1.5-fixes ...; a "/" in a branch name is not allowed in a download name
+      - name: download name
+        id: artifact
+        shell: bash
+        run: |
+          ref="${GITHUB_REF_NAME//\//-}"
+          if [ "$ref" = "features" ]; then ref="beta"; fi
+          echo "name=curses-$ref" >> "$GITHUB_OUTPUT"
+
       # download from the run page (Actions tab)
       - name: upload
         uses: actions/upload-artifact@v4
         with:
-          # one download per branch: curses-fixes, curses-beta (the features branch holds the beta build)
-          name: curses-${{ github.ref_name == 'features' && 'beta' || github.ref_name }}
+          name: ${{ steps.artifact.outputs.name }}
           if-no-files-found: error
           path: |
             src-tauri/target/release/curses.exe
