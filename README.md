@@ -91,7 +91,7 @@ Bug fixes and ideas are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) and the 
 
 ## Building from source
 
-You need Windows, Node 20, pnpm 9 and Rust **1.79.0**. Newer Rust versions fail on the locked `time` 0.3.30 package.
+You need Windows, Node 20, pnpm 9 and Rust **1.79.0** (the version the releases are built and tested with).
 
 ```
 pnpm install --frozen-lockfile
