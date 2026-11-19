@@ -8,7 +8,7 @@ Speech-to-text captions for VRChat, OBS and Twitch chat. You talk, and your word
 
 > **Fork notice.** This is a modified version of [curses by mmpneo](https://github.com/mmpneo/curses). It was modified starting November 2026. It stays licensed under the GNU AGPL-3.0 (see [LICENSE.md](LICENSE.md)). It is not affiliated with or endorsed by the original author.
 
-This is a **first release**. It has been tested by very few people. Please [report problems](../../issues/new/choose).
+Current version: **0.1.4**. It is still young and tested by a small group, so please [report problems](../../issues/new/choose).
 
 ## Two builds
 
@@ -17,7 +17,7 @@ This is a **first release**. It has been tested by very few people. Please [repo
 | **fixes** | The original program plus bug fixes, plus an error log file. | You want the original program, only more stable. |
 | **beta** | Everything in fixes, plus new features first (see below). May have more bugs. | You want the new features early. |
 
-If you are not sure, take **fixes**. Take **beta** if you need one of its features, for example Twitch login with your own Client ID. You can change later, but see [Troubleshooting](docs/troubleshooting.md) first: some beta-only settings can be lost when you go back to fixes.
+If you are not sure, take **fixes** (the release marked "Latest"). Take **beta** if you need one of its features, for example Twitch login with your own Client ID. You can change later, but see [Troubleshooting](docs/troubleshooting.md) first: some beta-only settings can be lost when you go back to fixes.
 
 ## Download
 
@@ -41,8 +41,22 @@ From the original program:
 
 ## What's new in this fork
 
-- **Both builds:** 43 of the 44 bugs found in the original are fixed (the one left is listed under Known issues in the changelog), several security holes are closed, and the app writes an error log. The VRChat "typing..." bubble no longer gets stuck, and long messages are split properly.
-- **Beta build only:** a switch for the VRChat chatbox sound, pause the chatbox while you are AFK, Deepgram Nova-3 and Nova-2, custom words, a sentence pause setting, hotkeys, and your own Twitch Client ID typed into the app.
+**Both builds**
+
+- 43 of the 44 bugs found in the original are fixed (the one left is listed under Known issues in the changelog), several security holes are closed, and the app writes an error log.
+- **Native speech to text works again.** It no longer fails with "network" on the first start. It starts a fresh session at a pause before Microsoft cuts it off (about every 47 seconds), so no words are lost. And it tells you when Microsoft's free daily limit (about 10 hours of speech) is used up.
+- The browser speech page (Chrome or Edge) sends live text at once and starts again by itself after an error.
+- The VRChat "typing..." bubble no longer gets stuck, and long messages are split properly.
+
+**Beta build only**
+
+- **Live text while speaking:** the VRChat chatbox fills in as you talk, instead of one big block at the end.
+- **Swear and slur filter** for every speech service, including Chrome.
+- **Chrome or Edge (free):** one click opens the speech window with your language set. Chrome can also run offline on your PC.
+- How much of Native's free daily limit you have used, and when it starts again.
+- A switch for the VRChat chatbox sound, and pausing the chatbox while you are AFK.
+- Deepgram Nova-3 and Nova-2, custom words, and a sentence pause setting.
+- Hotkeys, and your own Twitch Client ID typed into the app.
 
 Full list: [CHANGELOG.md](CHANGELOG.md).
 
@@ -50,6 +64,7 @@ Full list: [CHANGELOG.md](CHANGELOG.md).
 
 1. Download the `.exe` (or install the `.msi`) from [Releases](../../releases) and start it.
 2. Open the **Speech to text** tab. Pick a service and fill in what it asks for (see [Speech to text](docs/speech-to-text.md)). Press **Start**.
+   Not sure which service? **Native** is free and needs nothing else. **Chrome or Edge** (beta) is free too. **Deepgram** and **Azure** are the most accurate, but they need an account and are paid after a free start.
 3. For VRChat: turn on OSC in the game, then open the **VRChat chatbox** tab and tick **Enable** (see [VRChat chatbox](docs/vrchat-chatbox.md)).
 4. For OBS: open the **OBS Studio** tab and press **Copy browser source url**. In OBS add a Browser source and paste it (see [OBS overlay](docs/obs-overlay.md)).
 5. For Twitch: open the **Twitch** tab and log in. In the beta build, paste your own Twitch Client ID first (see [Twitch](docs/twitch.md)).
