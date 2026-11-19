@@ -469,20 +469,53 @@
         sttInstance.interimResults = true;
         sttInstance.lang = selectDial.value;
         sttInstance.start();
-        sttInstance.onstart = () => {
-          buttonStart.textContent = "Listening..."
-        }
         isStarted = true;
 
-        sttInstance.onend = () => sttInstance && sttInstance.start();
+        const instance = sttInstance;
+        // this session got "start"
+        let sessionStarted = false;
+        // errors in a row since the last result, and "network" before "start" in a row
+        let errorRun = 0;
+        let refusedRun = 0;
+        let retryTimer;
+        const restart = (delay) => {
+          clearTimeout(retryTimer);
+          retryTimer = setTimeout(() => {
+            retryTimer = undefined;
+            if (sttInstance !== instance)
+              return;
+            sessionStarted = false;
+            try {
+              instance.start();
+            } catch (error) {
+              console.log(error);
+            }
+          }, delay);
+        };
+
+        sttInstance.onstart = () => {
+          sessionStarted = true;
+          refusedRun = 0;
+          buttonStart.textContent = "Listening..."
+        }
+
+        // keep alive: a normal end (silence) starts again at once, one that never started waits a second
+        sttInstance.onend = () => {
+          if (sttInstance !== instance || retryTimer !== undefined)
+            return;
+          restart(sessionStarted ? 0 : 1000);
+        };
 
         sttInstance.onresult = (event) => {
+          errorRun = 0;
           try {
             let interim_transcript = '';
-            let final_transcript = '';
             for (let i = event.resultIndex; i < event.results.length; ++i) {
               if (event.results[i].isFinal) {
-                final_transcript += event.results[i][0].transcript;
+                // each final result once; "\uFFFD" alone (or nothing) is junk
+                const final_transcript = event.results[i][0].transcript;
+                if (!/[^\uFFFD\s]/.test(final_transcript || ""))
+                  continue;
                 send({topic: "text.stt",data: {type: 0, value: final_transcript}});
                 addRowNode(final_transcript, 'stt.final');
               }
@@ -493,7 +526,25 @@
             }
           } catch (error) { }
         }
-        sttInstance.onerror = (e) => console.log(e);
+        sttInstance.onerror = (e) => {
+          console.log(e);
+          // silence, or our own stop
+          if (sttInstance !== instance || e.error === "no-speech" || e.error === "aborted")
+            return;
+          // refused twice in a row before it started: the speech service's daily limit, retrying can't help
+          if (e.error === "network" && !sessionStarted && ++refusedRun >= 2) {
+            clearTimeout(retryTimer);
+            startSTT(); // stop
+            addRowNode("The speech service refused to start. Most likely its free daily limit is used up (in Edge about 10 hours of speech a day). Try again later, or use Chrome.", 'stt.error');
+            return;
+          }
+          // its "end" may never come: end it now and start again after a wait
+          errorRun++;
+          restart(Math.min(1000 * 2 ** (errorRun - 1), 10000));
+          try {
+            instance.abort();
+          } catch (error) { }
+        };
 
         window.onbeforeunload = () => {
           sttInstance && sttInstance.stop();

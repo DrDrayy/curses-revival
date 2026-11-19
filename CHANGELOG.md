@@ -2,6 +2,13 @@
 
 All notable changes to this fork of [curses by mmpneo](https://github.com/mmpneo/curses). Based on the original at its last commit (June 2024). Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Fixed (both builds)
+- **Native** no longer fails with "network" on the first start after installing, or on every start when your PC blocks `config.edge.skype.com` (ad blockers, Pi-hole). The app's browser now uses the Microsoft speech server that accepts apps; the newer one always refused it.
+- **Native** explains when Microsoft's free daily limit (about 10 hours of speech a day) is used up, instead of retrying for nothing.
+- **Native** no longer gets stuck after a failed try: it ends that try itself and starts again after a short wait, instead of waiting for an end that sometimes never came.
+
 ## [0.1.3] - 2026-11-19
 
 ### Added (features build)

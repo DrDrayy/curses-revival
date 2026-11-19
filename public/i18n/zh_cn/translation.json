@@ -68,6 +68,8 @@
     "state_": "静音",
 
     "native_title": "本地",
+    "native_give_up": "微软语音服务没有响应（网络错误）。请改用 Browser（配合 Chrome）、Deepgram 或 Azure。",
+    "native_daily_limit": "微软语音服务拒绝启动。很可能是它的每日免费额度（约 10 小时语音）已用完，24 小时内会恢复。在此之前，请使用 Browser（配合 Chrome）、Deepgram 或 Azure。",
 
     "browser_title": "浏览器",
     "browser_open_edge": "打开 Edge",
