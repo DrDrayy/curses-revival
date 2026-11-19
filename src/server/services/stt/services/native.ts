@@ -18,6 +18,8 @@ export class STT_NativeService implements ISTTService {
   #instance?: SpeechRecognition;
   #stopped = true;
   #networkFails = 0;
+  // the session that just ended failed with "network": wait before the next try
+  #endAfterError = false;
   #retryTimer?: ReturnType<typeof setTimeout>;
   
   dispose(): void {}
@@ -61,6 +63,7 @@ export class STT_NativeService implements ISTTService {
         return;
       if (error.error === "network") {
         this.#networkFails++;
+        this.#endAfterError = true;
         if (this.#networkFails > NETWORK_RETRIES)
           this.stop(NATIVE_GIVE_UP_MESSAGE);
         // otherwise "end" follows and starts it again after a wait
@@ -72,7 +75,9 @@ export class STT_NativeService implements ISTTService {
     this.#instance.onend = () => {
       if (this.#stopped)
         return;
-      const delay = this.#networkFails ? RETRY_DELAYS[Math.min(this.#networkFails, RETRY_DELAYS.length) - 1] : 0;
+      // a normal end (silence) starts again at once, only a failed try waits
+      const delay = this.#endAfterError ? RETRY_DELAYS[Math.min(this.#networkFails, RETRY_DELAYS.length) - 1] : 0;
+      this.#endAfterError = false;
       clearTimeout(this.#retryTimer);
       this.#retryTimer = setTimeout(() => {
         if (this.#stopped)
