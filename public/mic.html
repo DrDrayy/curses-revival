@@ -454,13 +454,10 @@
         (ws.OPEN === ws.readyState) && ws.send(JSON.stringify(obj));
       }
 
-      // throttle interim
-      let w = false;
+      // live (interim) text goes to the app at once, like the in-app services
+      // (it used to drop updates for 0.4 s after each one, so captions lagged behind)
       function sendInterimThrottle(message) {
-        if (w) return;
         send(message);
-        w = true;
-        setTimeout(() => (w = false), 400);
       }
     
 

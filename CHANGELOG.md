@@ -2,6 +2,11 @@
 
 All notable changes to this fork of [curses by mmpneo](https://github.com/mmpneo/curses). Based on the original at its last commit (June 2024). Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.1.3] - 2026-11-19
+
+### Fixed (both builds)
+- The browser speech page (Chrome or Edge) sends live text to curses at once. It used to drop updates for 0.4 seconds after each one, so captions lagged behind the in-app services.
+
 ## [0.1.2] - 2026-11-19
 
 ### Fixed (both builds)
