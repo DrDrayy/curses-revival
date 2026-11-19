@@ -472,6 +472,12 @@
         isStarted = true;
 
         const instance = sttInstance;
+        const stopWithMessage = (message) => {
+          clearTimeout(retryTimer);
+          if (sttInstance === instance)
+            startSTT(); // stop
+          addRowNode(message, 'stt.error');
+        };
         // this session got "start"
         let sessionStarted = false;
         // errors in a row since the last result, and "network" before "start" in a row
@@ -488,7 +494,7 @@
             try {
               instance.start();
             } catch (error) {
-              console.log(error);
+              stopWithMessage(`Listening stopped: ${error && error.message || error}. Press Start again.`);
             }
           }, delay);
         };
@@ -531,13 +537,12 @@
           // silence, or our own stop
           if (sttInstance !== instance || e.error === "no-speech" || e.error === "aborted")
             return;
+          // the microphone or the service is not allowed, or the language is not offered: retrying can't help
+          if (e.error === "not-allowed" || e.error === "service-not-allowed" || e.error === "language-not-supported")
+            return stopWithMessage(`Listening stopped: ${e.error}. Check the microphone permission and the language, then press Start again.`);
           // refused twice in a row before it started: the speech service's daily limit, retrying can't help
-          if (e.error === "network" && !sessionStarted && ++refusedRun >= 2) {
-            clearTimeout(retryTimer);
-            startSTT(); // stop
-            addRowNode("The speech service refused to start. Most likely its free daily limit is used up (in Edge about 10 hours of speech a day). Try again later, or use Chrome.", 'stt.error');
-            return;
-          }
+          if (e.error === "network" && !sessionStarted && ++refusedRun >= 2)
+            return stopWithMessage("The speech service refused to start. Most likely its free daily limit is used up (in Edge about 10 hours of speech a day). Try again later, or use Chrome.");
           // its "end" may never come: end it now and start again after a wait
           errorRun++;
           restart(Math.min(1000 * 2 ** (errorRun - 1), 10000));
