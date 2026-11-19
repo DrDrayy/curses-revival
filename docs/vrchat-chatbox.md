@@ -20,11 +20,22 @@ Your speech appears in the VRChat chatbox above your head. You can keep your VRC
 - Messages are sent to VRChat from any free port on your PC. VRChat itself still listens on its normal OSC port.
 - The **Target** list also has KillFrenzy avatar text, for avatars that support it.
 
-## Play chatbox sound (features build)
+## Play chatbox sound (beta build)
 
 Under **VRC Textbox options** there is a **Play chatbox sound** box. VRChat plays a small sound when a chatbox message arrives. Untick the box for silent messages. It is on by default.
 
-## Pause chatbox while AFK (features build)
+## Live text while speaking (beta build)
+
+Under **VRC Textbox options**, tick **Live text while speaking** to see your words in the chatbox while you talk, instead of the whole sentence at once when you stop.
+
+- The chatbox updates about every 1.5 seconds. VRChat drops chatbox messages that come faster.
+- When you finish the sentence, the finished text replaces the live text. Words may change for a moment while the speech service corrects itself.
+- Long speech shows the newest words (the chatbox holds 144 characters).
+- The chatbox sound plays only for the finished sentence.
+
+It is off by default.
+
+## Pause chatbox while AFK (beta build)
 
 When you are AFK in VRChat, nobody reads the chatbox. This option stops sending text until you are back.
 

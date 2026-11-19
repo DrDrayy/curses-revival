@@ -4,7 +4,7 @@ Thanks for helping with curses-revival, a fork of [curses by mmpneo](https://git
 
 ## Branches
 
-- `features` is the main branch (the front page). New features go here.
+- `features` is the main branch (the front page). It holds the beta build: new features go here first.
 - `fixes` holds the original program plus bug fixes only. Bug fixes go here first and are then merged into `features`.
 
 ## Reporting bugs and ideas
@@ -34,4 +34,4 @@ For a quick type check without building: `pnpm exec tsc --noEmit`.
 
 ## Releases
 
-Pushing a tag like `v0.1.2-features` or `v0.1.2-fixes` builds the program and publishes a Release. Update the version in `src-tauri/Cargo.toml` first.
+Pushing a tag like `v0.1.4-beta` (on `features`) or `v0.1.4-fixes` (on `fixes`) builds the program and publishes a Release. Update the version in `src-tauri/Cargo.toml` first.

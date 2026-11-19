@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Only the newest release of each build (`-features` and `-fixes`) gets security fixes.
+Only the newest release of each build (`-beta` and `-fixes`) gets security fixes.
 
 ## Reporting a problem
 

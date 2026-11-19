@@ -12,14 +12,14 @@ body:
       label: Which build?
       options:
         - fixes
-        - features
+        - beta
     validations:
       required: true
   - type: input
     id: version
     attributes:
       label: Version or tag
-      description: For example v0.1.0-features. Or write the Actions run if you used one.
+      description: For example v0.1.4-beta. Or write the Actions run if you used one.
     validations:
       required: true
   - type: input
