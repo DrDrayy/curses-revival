@@ -2,18 +2,20 @@
 
 All notable changes to this fork of [curses by mmpneo](https://github.com/mmpneo/curses). Based on the original at its last commit (June 2024). Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [0.1.4] - 2026-11-19
 
 ### Changed
 - The features build is now called the **beta build**: its releases end in `-beta` (before: `-features`). The fixes build is now the default download ("Latest").
 
 ### Added (beta build)
+- **Native** shows how much of Microsoft's free daily limit (about 10 hours of speech) is used, and when it starts again from zero. curses only reads that count, it never changes it.
 - **Live text while speaking** for the VRChat chatbox: the chatbox fills in as you talk, about every 1.5 seconds, and the finished sentence replaces it. Off by default.
 
 ### Fixed (both builds)
 - **Native** no longer fails with "network" on the first start after installing, or on every start when your PC blocks `config.edge.skype.com` (ad blockers, Pi-hole). The app's browser now uses the Microsoft speech server that accepts apps; the newer one always refused it.
 - **Native** explains when Microsoft's free daily limit (about 10 hours of speech a day) is used up, instead of retrying for nothing.
 - **Native** no longer gets stuck after a failed try: it ends that try itself and starts again after a short wait, instead of waiting for an end that sometimes never came.
+- **Native** and the **browser speech page**: Microsoft's online speech ends every session after about 47 seconds. curses now starts a new session at a pause before that, and keeps the words of a session that gets cut anyway.
 - **Browser speech page** (Chrome or Edge): after an error it starts again by itself after a short wait, instead of sitting on "Listening..." for good. It stops with a message when the microphone is not allowed or when the speech service's daily limit is used up. Empty or garbled final results are no longer sent.
 
 ## [0.1.3] - 2026-11-19
