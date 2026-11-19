@@ -20,6 +20,8 @@ const TextboxInspector: FC = () => {
     <Inspector.SubHeader>{t('vrc.textbox_title')}</Inspector.SubHeader>
     <InputCheckbox label="vrc.textbox_show_indicator" value={state.indicator} onChange={e => up("indicator", e)} />
     <InputCheckbox label="vrc.textbox_notify_sound" value={state.notifySound} onChange={e => up("notifySound", e)} />
+    <InputCheckbox label="vrc.textbox_live_text" value={state.liveText} onChange={e => up("liveText", e)} />
+    <Inspector.Description>{t('vrc.textbox_live_text_desc')}</Inspector.Description>
     <button className="btn btn-sm" onClick={() => window.ApiServer.vrc.sendTest("Test test test!")}>{t('vrc.btn_send_test')}</button>
   </>
 }

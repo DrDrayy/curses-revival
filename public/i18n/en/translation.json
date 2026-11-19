@@ -248,6 +248,8 @@
     "status_afk": "AFK, chatbox paused",
     "status_no_data": "no data yet",
     "textbox_notify_sound": "Play chatbox sound",
+    "textbox_live_text": "Live text while speaking",
+    "textbox_live_text_desc": "The chatbox fills in as you talk, about every 1.5 seconds (VRChat allows no faster), and the finished sentence replaces it. Words may change for a moment while the speech service corrects itself. Long speech shows the newest words. The sound plays for the finished sentence only.",
     "title": "VRChat chatbox",
     "notice_title": "Enable OSC in VRChat first!",
     "notice_desc": "Radial Menu » Options » OSC » Enable",

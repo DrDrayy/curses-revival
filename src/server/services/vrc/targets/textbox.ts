@@ -9,12 +9,31 @@ const MIN_GAP = 1500;
 const MS_PER_CHAR = 25;
 // chunks that may wait for their turn, the oldest are dropped when speech is faster than the chatbox
 const MAX_WAITING = 3;
+// live text: at most one update this often (faster chatbox messages get dropped or timed out by VRChat)
+const LIVE_GAP = 1500;
+
+// the newest words that fit in the chatbox
+function lastPart(text: string, max: number) {
+  const chars = Array.from(text);
+  if (chars.length <= max)
+    return text;
+  let tail = chars.slice(chars.length - (max - 1)).join("");
+  // start at a whole word
+  const space = tail.indexOf(" ");
+  if (space >= 0 && space < 30)
+    tail = tail.slice(space + 1);
+  return "\u2026" + tail;
+}
 
 class VRC_TextboxTarget implements IVRCTarget {
   #queue: string[] = [];
   #timer?: ReturnType<typeof setTimeout>;
   // earliest time the next message may replace the one on screen
   #nextSendAt = 0;
+  // live text: the newest words so far, the last ones sent, and the planned update
+  #liveText = "";
+  #liveSent = "";
+  #liveTimer?: ReturnType<typeof setTimeout>;
 
   #sendChunk(text: string) {
     sendOsc("/chatbox/input", [
@@ -39,7 +58,40 @@ class VRC_TextboxTarget implements IVRCTarget {
     }, Math.max(0, this.#nextSendAt - Date.now()));
   }
 
+  #stopLive() {
+    clearTimeout(this.#liveTimer);
+    this.#liveTimer = undefined;
+    this.#liveText = "";
+    this.#liveSent = "";
+  }
+
+  // show the newest live text once the chatbox may change again
+  #scheduleLive() {
+    if (this.#liveTimer !== undefined)
+      return;
+    this.#liveTimer = setTimeout(() => {
+      this.#liveTimer = undefined;
+      // finished sentences still waiting go first
+      if (this.#timer !== undefined || this.#queue.length)
+        return;
+      if (Date.now() < this.#nextSendAt)
+        return this.#scheduleLive();
+      const text = this.#liveText;
+      if (!text || text === this.#liveSent)
+        return;
+      this.#liveSent = text;
+      sendOsc("/chatbox/input", [
+        { String: text },
+        { Bool: true },
+        { Bool: false }, // no sound while speaking
+      ]);
+      this.#nextSendAt = Date.now() + LIVE_GAP;
+    }, Math.max(0, this.#nextSendAt - Date.now()));
+  }
+
   pushFinal(value: string): void {
+    // the finished sentence replaces the live text
+    this.#stopLive();
     // the message replaces the typing bubble
     this.#stopIndicator();
     // the chatbox shows at most 9 lines: no line breaks
@@ -78,13 +130,21 @@ class VRC_TextboxTarget implements IVRCTarget {
       this.#sendIndicator(false);
     }
   }
-  pushInterim(_value: string): void {
+  pushInterim(value: string): void {
+    if (this.state.liveText) {
+      const text = lastPart((value ?? "").replace(/\s+/g, " ").trim(), MAX_LENGTH);
+      if (text) {
+        this.#liveText = text;
+        this.#scheduleLive();
+      }
+    }
     if (this.state.indicator) {
       this.#indicatorOn = true;
       this.#sendIndicatorThrottled(true);
     }
   }
   cancel(): void {
+    this.#stopLive();
     clearTimeout(this.#timer);
     this.#timer = undefined;
     this.#queue = [];

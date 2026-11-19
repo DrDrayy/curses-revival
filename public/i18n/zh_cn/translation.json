@@ -243,6 +243,8 @@
     "status_afk": "AFK，聊天框已暂停",
     "status_no_data": "尚无数据",
     "textbox_notify_sound": "播放聊天框提示音",
+    "textbox_live_text": "说话时实时显示文字",
+    "textbox_live_text_desc": "说话时聊天框会实时更新，大约每 1.5 秒一次（VRChat 不允许更快），说完后由完整的句子替换。语音服务修正时，文字可能会短暂变化。说得很长时只显示最新的文字。提示音只在完整句子时播放。",
     "title": "VRChat chatbox",
     "notice_title": "请先在 VRChat 中启用 OSC!",
     "notice_desc": "菜单 » 设置 » OSC » 启用",

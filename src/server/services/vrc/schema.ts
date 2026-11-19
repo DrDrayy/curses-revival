@@ -20,6 +20,8 @@ export const Service_VRC_Schema = z.object({
   textbox: z.object({
     indicator: zSafe(z.coerce.boolean(), true),
     notifySound: zSafe(z.coerce.boolean(), true),
+    // show the words in the chatbox while speaking, not only the finished sentence
+    liveText: zSafe(z.coerce.boolean(), false),
   }).default({}),
   killfrenzy: z.object({
     syncDelay: zSafe(zStringNumber(), "250"),
