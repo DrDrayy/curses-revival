@@ -12,7 +12,7 @@ const MAX_WAITING = 3;
 // live text: at most one update this often (faster chatbox messages get dropped or timed out by VRChat)
 const LIVE_GAP = 1500;
 // live text that arrives this soon after a finished sentence is a late part of that sentence (the UwU
-// filter can delay it): it must not replace the finished sentence
+// filter can delay it): it must not replace the finished sentence or turn the typing bubble on again
 const LATE_LIVE_MS = 500;
 
 // the newest words that fit in the chatbox
@@ -136,7 +136,10 @@ class VRC_TextboxTarget implements IVRCTarget {
     }
   }
   pushInterim(value: string): void {
-    if (this.state.liveText && Date.now() - this.#lastFinalAt >= LATE_LIVE_MS) {
+    // a late part of the sentence that just finished: no live text, no typing bubble
+    if (Date.now() - this.#lastFinalAt < LATE_LIVE_MS)
+      return;
+    if (this.state.liveText) {
       const text = lastPart((value ?? "").replace(/\s+/g, " ").trim(), MAX_LENGTH);
       if (text) {
         this.#liveText = text;
