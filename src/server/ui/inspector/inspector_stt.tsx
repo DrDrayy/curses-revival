@@ -216,7 +216,7 @@ const Inspector_STT: FC = () => {
         <InputText type="number" step="1" label="stt.field_sentence_pause" value={data.data.sentencePauseMs} onChange={e => up("sentencePauseMs", e.target.value)} />
         <Inspector.Description>{t('stt.sentence_pause_desc')}</Inspector.Description>
         <InputSelect options={[
-          { label: "Native", value: STT_Backends.native },
+          { label: "Native (not reliable)", value: STT_Backends.native },
           { label: "Browser", value: STT_Backends.browser },
           { label: "Azure", value: STT_Backends.azure },
           { label: "Deepgram", value: STT_Backends.deepgram },
