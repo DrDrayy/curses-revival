@@ -2,10 +2,14 @@
 
 All notable changes to this fork of [curses by mmpneo](https://github.com/mmpneo/curses). Based on the original at its last commit (June 2024). Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [0.1.2] - 2026-11-19
 
-### Changed
-- Troubleshooting and speech-to-text guides explain the Native "network" error and recommend Browser with Chrome, or Deepgram / Azure.
+### Fixed (both builds)
+- Native speech-to-text no longer stops at the first "network" error from Microsoft's speech service. It tries again (after 1, 2, 4, 8 and 10 seconds) and only stops after six failures in a row, with a message that suggests Browser with Chrome, Deepgram or Azure.
+
+### Changed (both builds)
+- Native is now called "Native (not reliable)" in the service list.
+- The troubleshooting and speech-to-text guides explain the Native "network" error.
 
 ## [0.1.1] - 2026-11-12
 

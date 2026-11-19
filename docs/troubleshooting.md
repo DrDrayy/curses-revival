@@ -35,8 +35,9 @@ Only one app can listen on port 9001, VRChat's default OSC output port. Another 
 
 ## Speech to text says "network", or stops after a while (Native)
 
-**Native** does not recognise speech on your PC. It sends your voice to Microsoft's online speech service through the app's built-in browser, and "network" means that trip failed. This is almost always on Microsoft's side, not your internet: the browser built into apps often cannot reach that service, and Microsoft's speech service has been unreliable in Edge too.
+**Native (not reliable)** does not recognise speech on your PC. It sends your voice to Microsoft's online speech service through the app's built-in browser, and "network" means that trip failed. This is almost always on Microsoft's side, not your internet: the browser built into apps often cannot reach that service, and Microsoft's speech service has been unreliable in Edge too.
 
+- curses rides out short drops by itself: it retries for about 25 seconds before it stops and shows the message.
 - Switch **Service** to **Browser** and press **Open Chrome**. Chrome uses Google's speech service, which is usually reliable. Keep the Chrome tab open while you stream.
 - **Open Edge** uses the same Microsoft service as Native, so it can fail the same way.
 - For the most reliable results, use **Deepgram** or **Azure**. Both need a free account and a key, give some free use to start with, and then charge (see [Speech to text](speech-to-text.md)).

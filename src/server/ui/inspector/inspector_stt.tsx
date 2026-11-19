@@ -215,7 +215,7 @@ const Inspector_STT: FC = () => {
       <span className="link link-accent link-hover font-semibold flex items-center gap-2 text-sm" onClick={handleShowReplacements}><RiCharacterRecognitionFill/>{t('common.btn_edit_replacements')}</span>
       <Inspector.Deactivatable active={state.status === ServiceNetworkState.disconnected}>
         <InputSelect options={[
-          { label: "Native", value: STT_Backends.native },
+          { label: "Native (not reliable)", value: STT_Backends.native },
           { label: "Browser", value: STT_Backends.browser },
           { label: "Azure", value: STT_Backends.azure },
           { label: "Deepgram", value: STT_Backends.deepgram },
